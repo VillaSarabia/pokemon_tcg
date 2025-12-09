@@ -1,0 +1,1153 @@
+{% extends 'base.html' %}
+
+{% block title %}Pokemon TCG - Tienda Oficial de Cartas Pokémon{% endblock %}
+
+{% block content %}
+<!-- Hero Section con video background -->
+<section class="hero-section position-relative overflow-hidden">
+    <div class="hero-video-overlay"></div>
+    <div class="hero-particles" id="particles-js"></div>
+    
+    <div class="container position-relative z-3 py-5">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-7">
+                <div class="animate-slide-up">
+                    <div class="badge-gradient mb-4">
+                        <span class="badge-text">
+                            <i class="fas fa-bolt me-2"></i>TIENDA OFICIAL
+                        </span>
+                    </div>
+                    
+                    <h1 class="display-3 fw-bold mb-4 text-white hero-title">
+                        <span class="gradient-text">Pokémon</span> TCG
+                    </h1>
+                    
+                    <p class="hero-subtitle mb-4">
+                        Descubre la colección definitiva de cartas Pokémon Trading Card Game. 
+                        <span class="highlight-text">Cartas originales, expansiones completas y coleccionables exclusivos.</span>
+                    </p>
+                    
+                    <div class="d-flex flex-wrap gap-3 mb-5">
+                        <a href="{% url 'lista_cartas' %}" class="btn-hero btn-explore">
+                            <span class="btn-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <span class="btn-text">Explorar Colección</span>
+                            <span class="btn-sparkle"></span>
+                        </a>
+                        
+                        <a href="#destacadas" class="btn-hero btn-highlight">
+                            <span class="btn-icon">
+                                <i class="fas fa-crown"></i>
+                            </span>
+                            <span class="btn-text">Cartas Destacadas</span>
+                        </a>
+                        
+                        {% if not user.is_authenticated %}
+                        <a href="{% url 'register' %}" class="btn-hero btn-register">
+                            <span class="btn-icon">
+                                <i class="fas fa-gift"></i>
+                            </span>
+                            <span class="btn-text">+10% Dto.</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Stats con animación -->
+                <div class="stats-container animate-fade-in">
+                    <div class="row g-4">
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-number" data-count="{{ total_cartas|default:'500' }}">0</div>
+                                <div class="stat-label">Cartas</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-number" data-count="{{ total_expansiones|default:'50' }}">0</div>
+                                <div class="stat-label">Expansiones</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-number" data-count="49">0</div>
+                                <div class="stat-label">/5 Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-5 text-center d-none d-lg-block">
+                <div class="floating-cards">
+                    <!-- Carta flotante 1 -->
+                    <div class="floating-card card-1">
+                        <div class="card-glow"></div>
+                        <img src="https://images.pokemontcg.io/base1/4_hires.png" 
+                             alt="Charizard" 
+                             class="img-fluid floating-card-img">
+                    </div>
+                    
+                    <!-- Carta flotante 2 -->
+                    <div class="floating-card card-2">
+                        <div class="card-glow"></div>
+                        <img src="https://images.pokemontcg.io/base1/5_hires.png" 
+                             alt="Blastoise" 
+                             class="img-fluid floating-card-img">
+                    </div>
+                    
+                    <!-- Carta flotante 3 -->
+                    <div class="floating-card card-3">
+                        <div class="card-glow"></div>
+                        <img src="https://images.pokemontcg.io/base1/3_hires.png" 
+                             alt="Venusaur" 
+                             class="img-fluid floating-card-img">
+                    </div>
+                    
+                    <!-- Pokébola central -->
+                    <div class="pokeball-center">
+                        <div class="pokeball-inner animate-spin">
+                            <div class="pokeball-top"></div>
+                            <div class="pokeball-center-dot"></div>
+                            <div class="pokeball-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+        <div class="mouse">
+            <div class="wheel"></div>
+        </div>
+        <div class="arrow arrow-first"></div>
+        <div class="arrow arrow-second"></div>
+    </div>
+</section>
+
+<!-- Cartas Destacadas -->
+<section id="destacadas" class="section-py">
+    <div class="container">
+        <div class="section-header animate-slide-up">
+            <div class="section-badge">
+                <i class="fas fa-fire"></i>
+                MÁS POPULARES
+            </div>
+            <h2 class="section-title">
+                Cartas <span class="gradient-text">Destacadas</span>
+            </h2>
+            <p class="section-subtitle">
+                Las joyas más buscadas por coleccionistas y jugadores
+            </p>
+        </div>
+        
+        {% if cartas_destacadas %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for carta in cartas_destacadas %}
+            <div class="col animate-card">
+                <div class="card-highlight">
+                    <!-- Badge de ranking -->
+                    <div class="card-ranking">
+                        <div class="ranking-badge">
+                            <span class="ranking-number">#{{ forloop.counter }}</span>
+                            <i class="fas fa-trophy ranking-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Imagen de la carta -->
+                    <div class="card-image-wrapper">
+                        <div class="card-holo-effect"></div>
+                        <img src="{{ carta.imagen_frontal.url }}" 
+                             class="card-highlight-img"
+                             alt="{{ carta.nombre }}"
+                             loading="lazy">
+                    </div>
+                    
+                    <!-- Info de la carta -->
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ carta.nombre }}</h3>
+                            <div class="card-types">
+                                <span class="type-badge type-{{ carta.tipo|lower }}">
+                                    {{ carta.tipo }}
+                                </span>
+                                {% if carta.tipo_secundario %}
+                                <span class="type-badge type-{{ carta.tipo_secundario|lower }}">
+                                    {{ carta.tipo_secundario }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <i class="fas fa-layer-group"></i>
+                                <span>{{ carta.expansion.nombre|truncatechars:20 }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-gem"></i>
+                                <span>{{ carta.get_rareza_display }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="price-container">
+                                <div class="current-price">{{ carta.inventario.precio_actual }}€</div>
+                                {% if carta.inventario.en_promocion %}
+                                <div class="original-price">{{ carta.inventario.precio }}€</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-actions">
+                                <a href="{% url 'detalle_carta' carta.id %}" 
+                                   class="btn-card btn-details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                
+                                <form method="post" action="{% url 'agregar_al_carrito' carta.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-card btn-cart">
+                                        <i class="fas fa-cart-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Efecto hover -->
+                    <div class="card-glow-effect"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5 animate-fade-in">
+            <a href="{% url 'lista_cartas' %}" class="btn-gradient">
+                <span class="btn-gradient-text">Ver Colección Completa</span>
+                <i class="fas fa-arrow-right btn-gradient-icon"></i>
+                <div class="btn-gradient-bg"></div>
+            </a>
+        </div>
+        {% else %}
+        <!-- Placeholder state -->
+        <div class="placeholder-state animate-fade-in">
+            <div class="placeholder-icon">
+                <i class="fas fa-dragon"></i>
+            </div>
+            <h3>Colección en Preparación</h3>
+            <p>Estamos curando las mejores cartas para ti</p>
+            <a href="{% url 'lista_cartas' %}" class="btn-outline">
+                Explorar Disponibles
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Nuevas Llegadas con slider -->
+<section class="section-py bg-dark">
+    <div class="container">
+        <div class="section-header animate-slide-up text-light">
+            <div class="section-badge bg-warning">
+                <i class="fas fa-bolt"></i>
+                NUEVAS LLEGADAS
+            </div>
+            <h2 class="section-title text-white">
+                Lo <span class="gradient-text">Más Reciente</span>
+            </h2>
+            <p class="section-subtitle text-light">
+                ¡Sé el primero en añadirlas a tu colección!
+            </p>
+        </div>
+        
+        {% if nuevas_cartas %}
+        <div class="new-arrivals-slider">
+            <div class="swiper new-cards-slider">
+                <div class="swiper-wrapper">
+                    {% for carta in nuevas_cartas %}
+                    <div class="swiper-slide">
+                        <div class="new-card">
+                            <div class="new-card-badge">
+                                <span class="pulse-animation"></span>
+                                <span class="badge-text">NUEVO</span>
+                            </div>
+                            
+                            <div class="new-card-image">
+                                <img src="{{ carta.imagen_frontal.url }}" 
+                                     alt="{{ carta.nombre }}"
+                                     loading="lazy">
+                            </div>
+                            
+                            <div class="new-card-content">
+                                <h4>{{ carta.nombre|truncatechars:20 }}</h4>
+                                <p class="expansion-name">{{ carta.expansion.nombre|truncatechars:25 }}</p>
+                                
+                                <div class="new-card-footer">
+                                    <div class="price-tag">
+                                        {{ carta.inventario.precio_actual }}€
+                                    </div>
+                                    <a href="{% url 'detalle_carta' carta.id %}" class="quick-view">
+                                        <i class="fas fa-expand"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Navigation buttons -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'lista_cartas' %}?orden=nuevo" class="btn-outline-light">
+                Ver Todas las Novedades
+                <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Ofertas Especiales -->
+{% if cartas_oferta %}
+<section class="section-py bg-gradient-offer">
+    <div class="offer-particles" id="offer-particles"></div>
+    
+    <div class="container position-relative z-3">
+        <div class="section-header animate-slide-up text-center">
+            <div class="offer-timer mb-4">
+                <div class="timer-badge">
+                    <i class="fas fa-clock"></i>
+                    <span class="timer-text">OFERTA TERMINA EN:</span>
+                </div>
+                <div class="countdown-timer">
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="days">00</span>
+                        <span class="countdown-label">Días</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="hours">00</span>
+                        <span class="countdown-label">Horas</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="minutes">00</span>
+                        <span class="countdown-label">Min</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="seconds">00</span>
+                        <span class="countdown-label">Seg</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="section-title text-white">
+                <span class="text-warning">🔥</span> Ofertas Especiales
+            </h2>
+            <p class="section-subtitle text-light">
+                Descuentos exclusivos por tiempo limitado
+            </p>
+        </div>
+        
+        <div class="row g-4">
+            {% for carta in cartas_oferta %}
+            <div class="col-lg-4 col-md-6 animate-card">
+                <div class="offer-card">
+                    <div class="offer-card-header">
+                        <div class="offer-badge">
+                            <span class="offer-discount">
+                                -{{ carta.inventario.descuento_porcentaje }}%
+                            </span>
+                            <span class="offer-label">¡OFERTA!</span>
+                        </div>
+                    </div>
+                    
+                    <div class="offer-card-body">
+                        <div class="offer-card-image">
+                            <img src="{{ carta.imagen_frontal.url }}" 
+                                 alt="{{ carta.nombre }}"
+                                 loading="lazy">
+                        </div>
+                        
+                        <div class="offer-card-content">
+                            <h3>{{ carta.nombre }}</h3>
+                            
+                            <div class="price-comparison">
+                                <div class="old-price">
+                                    {{ carta.inventario.precio }}€
+                                </div>
+                                <div class="new-price">
+                                    {{ carta.inventario.precio_promocional }}€
+                                </div>
+                                <div class="savings">
+                                    Ahorras {{ carta.inventario.ahorro }}€
+                                </div>
+                            </div>
+                            
+                            <div class="stock-indicator">
+                                <div class="stock-label">
+                                    <i class="fas fa-box"></i>
+                                    {{ carta.inventario.cantidad_disponible }} disponibles
+                                </div>
+                                <div class="stock-bar">
+                                    <div class="stock-progress" 
+                                         style="width: {{ carta.inventario.stock_porcentaje }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="offer-card-actions">
+                            <a href="{% url 'detalle_carta' carta.id %}" class="btn-offer-details">
+                                <i class="fas fa-info-circle"></i>
+                                Detalles
+                            </a>
+                            <form method="post" action="{% url 'agregar_al_carrito' carta.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="cantidad" value="1">
+                                <button type="submit" class="btn-offer-cart">
+                                    <i class="fas fa-cart-plus"></i>
+                                    Añadir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="offer-card-glow"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Características -->
+<section class="section-py">
+    <div class="container">
+        <div class="section-header animate-slide-up text-center">
+            <h2 class="section-title">
+                ¿Por qué <span class="gradient-text">Pokémon TCG</span>?
+            </h2>
+            <p class="section-subtitle">
+                La experiencia definitiva para coleccionistas
+            </p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon icon-authentic">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h4>100% Oficial</h4>
+                    <p>Cartas certificadas por The Pokémon Company International</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card animate-fade-in" data-delay="100">
+                    <div class="feature-icon icon-shipping">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h4>Envío Premium</h4>
+                    <p>Entrega express con embalaje especial para coleccionistas</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card animate-fade-in" data-delay="200">
+                    <div class="feature-icon icon-security">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Compra Segura</h4>
+                    <p>Protección SSL y garantía de autenticidad</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card animate-fade-in" data-delay="300">
+                    <div class="feature-icon icon-support">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h4>Soporte Expert</h4>
+                    <p>Asesoramiento especializado en coleccionismo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Final -->
+<section class="section-py bg-gradient-cta">
+    <div class="container">
+        <div class="cta-card animate-slide-up">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="cta-content">
+                        <h2 class="cta-title">
+                            <i class="fas fa-sparkles"></i>
+                            ¡Tu Colección Te Espera!
+                        </h2>
+                        <p class="cta-text">
+                            Regístrate hoy y desbloquea beneficios exclusivos:
+                            <span class="highlight">10% de descuento</span> en tu primera compra,
+                            acceso a <span class="highlight">cartas exclusivas</span> y 
+                            <span class="highlight">puntos de recompensa</span>.
+                        </p>
+                        
+                        <div class="cta-actions">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'lista_cartas' %}" class="btn-cta-primary">
+                                Continuar Explorando
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'register' %}" class="btn-cta-primary">
+                                Crear Cuenta Gratis
+                                <i class="fas fa-gift"></i>
+                            </a>
+                            <a href="{% url 'login' %}" class="btn-cta-secondary">
+                                Iniciar Sesión
+                                <i class="fas fa-sign-in-alt"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 d-none d-lg-block">
+                    <div class="cta-image">
+                        <div class="pokeball-cta">
+                            <div class="pokeball-cta-inner">
+                                <div class="pokeball-cta-top"></div>
+                                <div class="pokeball-cta-center"></div>
+                                <div class="pokeball-cta-bottom"></div>
+                            </div>
+                        </div>
+                        <div class="sparkles">
+                            <div class="sparkle s1"></div>
+                            <div class="sparkle s2"></div>
+                            <div class="sparkle s3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
+<style>
+:root {
+    --pokemon-red: #FF0000;
+    --pokemon-blue: #3B4CCA;
+    --pokemon-yellow: #FFDE00;
+    --pokemon-dark: #2A2A2A;
+    --pokemon-light: #F5F5F5;
+    --gradient-primary: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-blue) 100%);
+    --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* Hero Section */
+.hero-section {
+    background: var(--gradient-dark);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.container position-relative z-3 py-5 {
+    background: var(--gradient-dark);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://assets.pokemon.com/static2/_ui/img/chrome/body_bg.png');
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.hero-title {
+    font-family: 'Pokemon Solid', sans-serif;
+    letter-spacing: 2px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.highlight-text {
+    background: linear-gradient(90deg, var(--pokemon-yellow), #FFD700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+}
+
+/* Botones Hero */
+.btn-hero {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-explore {
+    background: var(--pokemon-red);
+    color: white;
+}
+
+.btn-highlight {
+    background: transparent;
+    color: white;
+    border: 2px solid var(--pokemon-yellow);
+}
+
+.btn-register {
+    background: var(--pokemon-yellow);
+    color: var(--pokemon-dark);
+}
+
+.btn-hero:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255,0,0,0.3);
+}
+
+.btn-sparkle {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255,255,255,0.1) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg);
+    animation: sparkle 3s linear infinite;
+}
+
+/* Floating Cards */
+.floating-cards {
+    position: relative;
+    height: 500px;
+}
+
+.floating-card {
+    position: absolute;
+    width: 200px;
+    height: 280px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    transition: transform 0.5s ease;
+}
+
+.floating-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    z-index: 1;
+}
+
+.card-1 {
+    top: 10%;
+    left: 0;
+    transform: rotate(-15deg);
+    animation: float-card-1 6s ease-in-out infinite;
+    z-index: 1;
+}
+
+.card-2 {
+    top: 30%;
+    right: 0;
+    transform: rotate(10deg);
+    animation: float-card-2 7s ease-in-out infinite;
+    z-index: 2;
+}
+
+.card-3 {
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%) rotate(5deg);
+    animation: float-card-3 8s ease-in-out infinite;
+    z-index: 3;
+}
+
+/* Pokéball */
+.pokeball-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+}
+
+.pokeball-inner {
+    width: 120px;
+    height: 120px;
+    position: relative;
+}
+
+.pokeball-top {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 50%;
+    background: var(--pokemon-red);
+    border-radius: 60px 60px 0 0;
+    border-bottom: 4px solid var(--pokemon-dark);
+}
+
+.pokeball-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+    background: white;
+    border-radius: 0 0 60px 60px;
+    border-top: 4px solid var(--pokemon-dark);
+}
+
+.pokeball-center-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    background: white;
+    border: 4px solid var(--pokemon-dark);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* Animaciones */
+@keyframes float-card-1 {
+    0%, 100% { transform: rotate(-15deg) translateY(0); }
+    50% { transform: rotate(-15deg) translateY(-20px); }
+}
+
+@keyframes float-card-2 {
+    0%, 100% { transform: rotate(10deg) translateY(0); }
+    50% { transform: rotate(10deg) translateY(-25px); }
+}
+
+@keyframes float-card-3 {
+    0%, 100% { transform: translateX(-50%) rotate(5deg) translateY(0); }
+    50% { transform: translateX(-50%) rotate(5deg) translateY(-15px); }
+}
+
+@keyframes animate-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.animate-spin {
+    animation: animate-spin 20s linear infinite;
+}
+
+/* Stats */
+.stats-container {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.stat-card {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--pokemon-yellow);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Cartas Destacadas */
+.card-highlight {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.card-highlight:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+}
+
+.card-image-wrapper {
+    position: relative;
+    height: 250px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.card-holo-effect {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.2),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.card-highlight:hover .card-holo-effect {
+    left: 100%;
+}
+
+/* Type badges */
+.type-badge {
+    padding: 0.25rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.type-fire { background: #FF6B6B; color: white; }
+.type-water { background: #4D96FF; color: white; }
+.type-grass { background: #6BCB77; color: white; }
+.type-electric { background: #FFD93D; color: #000; }
+.type-psychic { background: #A66CFF; color: white; }
+
+/* Swiper slider */
+.new-arrivals-slider {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.new-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+
+.new-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.1);
+}
+
+/* Ofertas */
+.bg-gradient-offer {
+    background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.offer-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(255,75,43,0.2);
+}
+
+.offer-card:hover {
+    transform: scale(1.03);
+}
+
+/* Features */
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+}
+
+.icon-authentic {
+    background: linear-gradient(135deg, #6BCB77, #4CAF50);
+    color: white;
+}
+
+.icon-shipping {
+    background: linear-gradient(135deg, #4D96FF, #357ABD);
+    color: white;
+}
+
+.icon-security {
+    background: linear-gradient(135deg, #FFD93D, #FFC107);
+    color: #000;
+}
+
+.icon-support {
+    background: linear-gradient(135deg, #A66CFF, #8A2BE2);
+    color: white;
+}
+
+/* Animations */
+@keyframes animate-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes animate-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes animate-card {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animate-slide-up {
+    animation: animate-slide-up 0.8s ease forwards;
+}
+
+.animate-fade-in {
+    animation: animate-fade-in 0.8s ease forwards;
+}
+
+.animate-card {
+    animation: animate-card 0.6s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .floating-cards {
+        height: 300px;
+        margin-top: 3rem;
+    }
+    
+    .floating-card {
+        width: 120px;
+        height: 168px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+// Inicializar Swiper
+document.addEventListener('DOMContentLoaded', function() {
+    // Slider de nuevas llegadas
+    const newCardsSlider = new Swiper('.new-cards-slider', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        breakpoints: {
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 }
+        }
+    });
+    
+    // Contador de estadísticas
+    function animateCounter(element) {
+        const target = parseInt(element.getAttribute('data-count'));
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+        }, 16);
+    }
+    
+    // Observador para animaciones
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Animación de contadores
+                if (entry.target.classList.contains('stat-number')) {
+                    animateCounter(entry.target);
+                }
+                
+                // Animación de tarjetas
+                if (entry.target.classList.contains('animate-card') || 
+                    entry.target.classList.contains('animate-fade-in')) {
+                    const delay = entry.target.dataset.delay || 0;
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0) scale(1)';
+                    }, parseInt(delay));
+                }
+                
+                // Animación slide up
+                if (entry.target.classList.contains('animate-slide-up')) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+    
+    // Observar elementos
+    document.querySelectorAll('.stat-number, .animate-card, .animate-fade-in, .animate-slide-up').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Contador regresivo
+    function updateCountdown() {
+        const now = new Date();
+        const endTime = new Date();
+        endTime.setDate(endTime.getDate() + 3); // 3 días desde ahora
+        endTime.setHours(23, 59, 59, 999);
+        
+        const diff = endTime - now;
+        
+        if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+    }
+    
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    
+    // Partículas en el hero
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.3, random: true },
+            size: { value: 3, random: true },
+            line_linked: { enable: false },
+            move: { enable: true, speed: 1, direction: "none", random: true }
+        }
+    });
+    
+    // Smooth scroll para enlaces internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

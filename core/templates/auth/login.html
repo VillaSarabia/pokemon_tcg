@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Iniciar Sesión - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Usuario
+                            </label>
+                            <input type="text" 
+                                   name="username" 
+                                   id="username" 
+                                   class="form-control form-control-lg"
+                                   placeholder="Nombre de usuario"
+                                   required
+                                   autofocus>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">
+                                <i class="fas fa-lock me-2"></i>Contraseña
+                            </label>
+                            <input type="password" 
+                                   name="password" 
+                                   id="password" 
+                                   class="form-control form-control-lg"
+                                   placeholder="Contraseña"
+                                   required>
+                            <div class="form-text">
+                                <a href="#" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">
+                                Recordar sesión
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mb-4">
+                            <button type="submit" class="btn btn-pokemon btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </button>
+                        </div>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">¿No tienes cuenta?</p>
+                            <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg mt-2">
+                                <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                            </a>
+                        </div>
+                    </form>
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger mt-4">
+                        <strong>Error:</strong> Usuario o contraseña incorrectos.
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Demo credentials -->
+                    <div class="card mt-4 border-info">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-2"></i>Credenciales de prueba
+                        </div>
+                        <div class="card-body">
+                            <small class="text-muted">
+                                <strong>Usuario admin:</strong> admin / admin123<br>
+                                <strong>Usuario cliente:</strong> demo / demodemo
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

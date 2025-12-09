@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}400 - Solicitud Incorrecta{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h2 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Solicitud Incorrecta</h2>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Icono de error -->
+                    <div class="mb-4">
+                        <i class="fas fa-bug fa-5x text-info mb-4"></i>
+                    </div>
+                    
+                    <!-- Mensaje principal -->
+                    <h1 class="display-1 fw-bold text-info">400</h1>
+                    <h2 class="h3 mb-4">¡Solicitud incorrecta detectada!</h2>
+                    
+                    <p class="lead text-muted mb-4">
+                        El servidor no pudo procesar tu solicitud porque contiene sintaxis incorrecta o datos inválidos.
+                    </p>
+                    
+                    <!-- Causas comunes -->
+                    <div class="alert alert-warning mb-4">
+                        <h5 class="alert-heading">Causas comunes:</h5>
+                        <ul class="mb-0">
+                            <li>Formulario con datos inválidos</li>
+                            <li>Archivo demasiado grande</li>
+                            <li>Solicitud mal formada</li>
+                            <li>Cookies o caché desactualizados</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Soluciones -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-broom fa-3x text-success mb-3"></i>
+                                    <h5>Limpiar Caché</h5>
+                                    <p class="small">Borra el caché del navegador y cookies</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-redo fa-3x text-primary mb-3"></i>
+                                    <h5>Reintentar</h5>
+                                    <p class="small">Vuelve a intentar la operación</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                        <button onclick="window.location.reload()" class="btn btn-primary btn-lg">
+                            <i class="fas fa-redo me-2"></i>Reintentar
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>Ir al Inicio
+                        </a>
+                        <button onclick="clearBrowserData()" class="btn btn-outline-warning btn-lg">
+                            <i class="fas fa-trash me-2"></i>Limpiar Caché
+                        </button>
+                    </div>
+                    
+                    <!-- Instrucciones técnicas -->
+                    <div class="mt-5">
+                        <div class="card bg-light">
+                            <div class="card-body text-start">
+                                <h6 class="card-title">¿Sigues teniendo problemas?</h6>
+                                <ol class="small">
+                                    <li>Presiona Ctrl + F5 para forzar la recarga</li>
+                                    <li>Cierra y vuelve a abrir el navegador</li>
+                                    <li>Verifica que JavaScript esté habilitado</li>
+                                    <li>Intenta desde otro navegador</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function clearBrowserData() {
+    if (confirm('¿Estás seguro de que quieres limpiar el caché y cookies del sitio?')) {
+        // Esto es solo informativo, en realidad el usuario debe hacerlo manualmente
+        alert('Para limpiar completamente:\n1. Presiona Ctrl+Shift+Delete\n2. Selecciona "Caché" y "Cookies"\n3. Haz clic en "Limpiar datos"');
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

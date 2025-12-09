@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Mi Carrito - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-shopping-cart text-primary me-2"></i>Mi Carrito
+            </h1>
+            <p class="text-muted mb-0">
+                {% if carrito.items.count > 0 %}
+                {{ carrito.items.count }} producto{{ carrito.items.count|pluralize }} en tu carrito
+                {% else %}
+                Tu carrito está vacío
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'lista_cartas' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Seguir Comprando
+            </a>
+        </div>
+    </div>
+    
+    {% if carrito.items.count > 0 %}
+    <div class="row">
+        <!-- Lista de items -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Productos en el carrito</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50%">Producto</th>
+                                    <th class="text-center">Precio</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Subtotal</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr class="carrito-item align-middle">
+                                    <!-- Producto -->
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <img src="{{ item.carta.imagen_frontal.url }}" 
+                                                     alt="{{ item.carta.nombre }}"
+                                                     class="rounded"
+                                                     style="width: 80px; height: 80px; object-fit: contain;">
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">
+                                                    <a href="{% url 'detalle_carta' item.carta.id %}" 
+                                                       class="text-decoration-none text-dark">
+                                                        {{ item.carta.nombre }}
+                                                    </a>
+                                                </h6>
+                                                <div class="small text-muted">
+                                                    <span class="badge badge-tipo tipo-{{ item.carta.tipo|lower }} me-2">
+                                                        {{ item.carta.tipo }}
+                                                    </span>
+                                                    <span class="me-2">
+                                                        <i class="fas fa-gem me-1"></i>
+                                                        {{ item.carta.get_rareza_display }}
+                                                    </span>
+                                                    <span>
+                                                        <i class="fas fa-layer-group me-1"></i>
+                                                        {{ item.carta.expansion.nombre }}
+                                                    </span>
+                                                </div>
+                                                <div class="small text-muted">
+                                                    Stock: {{ item.inventario.cantidad_disponible }} unidades
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Precio -->
+                                    <td class="text-center align-middle">
+                                        <div class="h5 mb-0">{{ item.precio_unitario }}€</div>
+                                        {% if item.inventario.en_promocion %}
+                                        <small class="text-success">¡En oferta!</small>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <!-- Cantidad -->
+                                    <td class="text-center align-middle">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <form method="post" 
+                                                  action="{% url 'actualizar_carrito' item.id %}" 
+                                                  class="d-flex align-items-center">
+                                                {% csrf_token %}
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-secondary decrement"
+                                                        data-item-id="{{ item.id }}">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" 
+                                                       name="cantidad" 
+                                                       id="cantidad-item-{{ item.id }}"
+                                                       class="form-control form-control-sm mx-2 text-center" 
+                                                       value="{{ item.cantidad }}" 
+                                                       min="1" 
+                                                       max="{{ item.inventario.cantidad_disponible }}"
+                                                       style="width: 70px;"
+                                                       readonly>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-secondary increment"
+                                                        data-item-id="{{ item.id }}">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Subtotal -->
+                                    <td class="text-center align-middle">
+                                        <div class="h5 text-primary mb-0">{{ item.subtotal }}€</div>
+                                    </td>
+                                    
+                                    <!-- Acciones -->
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" 
+                                                    class="btn btn-outline-primary update-item"
+                                                    data-item-id="{{ item.id }}"
+                                                    title="Actualizar">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                            <a href="{% url 'eliminar_del_carrito' item.id %}" 
+                                               class="btn btn-outline-danger"
+                                               title="Eliminar"
+                                               onclick="return confirm('¿Eliminar este producto del carrito?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Acciones del carrito -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'vaciar_carrito' %}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('¿Estás seguro de vaciar el carrito?')">
+                            <i class="fas fa-trash me-2"></i>Vaciar Carrito
+                        </a>
+                        <a href="{% url 'lista_cartas' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i>Añadir Más Productos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resumen del pedido -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Detalles -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <strong>{{ carrito.subtotal }}€</strong>
+                        </div>
+                        
+                        {% if carrito.descuento > 0 %}
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Descuento:</span>
+                            <strong>-{{ carrito.descuento }}€</strong>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Envío:</span>
+                            <strong>
+                                {% if carrito.envio == 0 %}
+                                <span class="text-success">GRATIS</span>
+                                {% else %}
+                                {{ carrito.envio }}€
+                                {% endif %}
+                            </strong>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Impuestos (21%):</span>
+                            <strong>{{ carrito.impuestos }}€</strong>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="h5 mb-0">Total:</span>
+                            <span class="h4 text-primary mb-0">{{ carrito.total }}€</span>
+                        </div>
+                        
+                        {% if carrito.es_gratis_envio %}
+                        <div class="alert alert-success small mb-0">
+                            <i class="fas fa-shipping-fast me-2"></i>
+                            ¡Envío gratis! Tu pedido supera los 100€
+                        </div>
+                        {% elif carrito.subtotal >= 50 %}
+                        <div class="alert alert-info small mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            ¡Añade {{ 100|subtract:carrito.subtotal }}€ más para envío gratis!
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Cupón de descuento -->
+                    <div class="mb-4">
+                        <label for="cupon" class="form-label small">¿Tienes un cupón de descuento?</label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="cupon" 
+                                   placeholder="Código de descuento">
+                            <button class="btn btn-outline-primary" type="button">
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de checkout -->
+                    <div class="d-grid">
+                        <a href="{% url 'checkout' %}" class="btn btn-pokemon btn-lg">
+                            <i class="fas fa-lock me-2"></i>Proceder al Pago
+                        </a>
+                    </div>
+                    
+                    <!-- Métodos de pago aceptados -->
+                    <div class="mt-4">
+                        <p class="small text-muted mb-2">Métodos de pago aceptados:</p>
+                        <div class="d-flex justify-content-between">
+                            <i class="fab fa-cc-visa fa-2x text-primary"></i>
+                            <i class="fab fa-cc-mastercard fa-2x text-danger"></i>
+                            <i class="fab fa-cc-paypal fa-2x text-info"></i>
+                            <i class="fas fa-university fa-2x text-success"></i>
+                            <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Garantías -->
+                    <div class="mt-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-shield-alt text-success me-2"></i>
+                            <small class="text-muted">Compra 100% segura</small>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-undo text-primary me-2"></i>
+                            <small class="text-muted">Devolución en 30 días</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shipping-fast text-warning me-2"></i>
+                            <small class="text-muted">Envío en 24-48h</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Productos recomendados -->
+    <div class="mt-5">
+        <h3 class="h4 mb-4">Podría interesarte</h3>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for carta in recomendadas|slice:":4" %}
+            <div class="col">
+                <div class="card h-100 border">
+                    <img src="{{ carta.imagen_frontal.url }}" 
+                         class="card-img-top" 
+                         alt="{{ carta.nombre }}"
+                         style="height: 150px; object-fit: contain;">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ carta.nombre|truncatechars:20 }}</h6>
+                        <p class="card-text small text-muted mb-2">
+                            {{ carta.get_tipo_display }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary">{{ carta.inventario.precio_actual }}€</span>
+                            <a href="{% url 'agregar_al_carrito' carta.id %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-cart-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <!-- Carrito vacío -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+        </div>
+        <h3 class="mb-3">Tu carrito está vacío</h3>
+        <p class="text-muted mb-4">Añade algunos productos para continuar</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'lista_cartas' %}" class="btn btn-pokemon">
+                <i class="fas fa-search me-2"></i>Explorar Cartas
+            </a>
+            <a href="{% url 'wishlist' %}" class="btn btn-outline-primary">
+                <i class="fas fa-heart me-2"></i>Ver mi Wishlist
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Incrementar cantidad
+    const incrementButtons = document.querySelectorAll('.increment');
+    incrementButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            const input = document.getElementById(`cantidad-item-${itemId}`);
+            const max = parseInt(input.max);
+            
+            if (parseInt(input.value) < max) {
+                input.value = parseInt(input.value) + 1;
+                updateItem(itemId, input.value);
+            } else {
+                showNotification('warning', 'No hay más stock disponible');
+            }
+        });
+    });
+    
+    // Decrementar cantidad
+    const decrementButtons = document.querySelectorAll('.decrement');
+    decrementButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            const input = document.getElementById(`cantidad-item-${itemId}`);
+            
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateItem(itemId, input.value);
+            }
+        });
+    });
+    
+    // Actualizar item individual
+    const updateButtons = document.querySelectorAll('.update-item');
+    updateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            const input = document.getElementById(`cantidad-item-${itemId}`);
+            updateItem(itemId, input.value);
+        });
+    });
+    
+    function updateItem(itemId, cantidad) {
+        fetch(`/carrito/actualizar/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: `cantidad=${cantidad}`
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                throw new Error('Error al actualizar');
+            }
+        })
+        .catch(error => {
+            showNotification('error', 'Error al actualizar el carrito');
+        });
+    }
+    
+    // Aplicar cupón
+    const cuponBtn = document.querySelector('.btn-outline-primary[type="button"]');
+    if (cuponBtn) {
+        cuponBtn.addEventListener('click', function() {
+            const cupon = document.getElementById('cupon').value;
+            
+            if (cupon.trim() === '') {
+                showNotification('warning', 'Introduce un código de descuento');
+                return;
+            }
+            
+            // Simular aplicación de cupón
+            showNotification('info', `Cupón "${cupon}" aplicado correctamente`);
+            // En un caso real, haríamos una petición al servidor
+        });
+    }
+    
+    function showNotification(type, message) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+});
+</script>
+
+{% load custom_filters %}
+{% endblock %}
+{% endblock %}

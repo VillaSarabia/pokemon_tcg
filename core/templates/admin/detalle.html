@@ -1,0 +1,223 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{{ model_name_display }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'lista_admin' model_name=model_name %}">{{ model_name_display }}</a></li>
+                    <li class="breadcrumb-item active">Detalle</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'editar_admin' model_name=model_name obj_id=objeto.id %}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Editar
+            </a>
+            <a href="{% url 'eliminar_admin' model_name=model_name obj_id=objeto.id %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i>Eliminar
+            </a>
+            <a href="{% url 'lista_admin' model_name=model_name %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+    
+    <!-- Detalle del objeto -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información detallada</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <!-- Información básica de la carta -->
+                                <tr>
+                                    <th width="30%" class="bg-light">Nombre</th>
+                                    <td>{{ objeto.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Código</th>
+                                    <td>{{ objeto.codigo }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Expansión</th>
+                                    <td>{{ objeto.expansion.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Número</th>
+                                    <td>{{ objeto.numero_en_expansion }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Tipo</th>
+                                    <td>
+                                        {{ objeto.tipo }}
+                                        {% if objeto.tipo_secundario %}
+                                            / {{ objeto.tipo_secundario }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">HP</th>
+                                    <td>{{ objeto.hp|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Rareza</th>
+                                    <td>{{ objeto.get_rareza_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Condición</th>
+                                    <td>{{ objeto.get_condicion_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Holográfica</th>
+                                    <td>
+                                        {% if objeto.es_holo %}
+                                            <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Primera edición</th>
+                                    <td>
+                                        {% if objeto.primera_edicion %}
+                                            <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Idioma</th>
+                                    <td>{{ objeto.idioma }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Descripción</th>
+                                    <td>{{ objeto.descripcion|linebreaks }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Coleccionable</th>
+                                    <td>
+                                        {% if objeto.coleccionable %}
+                                            <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Popularidad</th>
+                                    <td>{{ objeto.popularidad }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Precio estimado</th>
+                                    <td>{{ objeto.precio_estimado }}€</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Imagen frontal</th>
+                                    <td>
+                                        {% if objeto.imagen_frontal %}
+                                            <img src="{{ objeto.imagen_frontal.url }}" alt="Frontal" class="img-fluid" style="max-height: 200px;">
+                                        {% else %}
+                                            <span class="text-muted">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Imagen trasera</th>
+                                    <td>
+                                        {% if objeto.imagen_trasera %}
+                                            <img src="{{ objeto.imagen_trasera.url }}" alt="Trasera" class="img-fluid" style="max-height: 200px;">
+                                        {% else %}
+                                            <span class="text-muted">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Relaciones -->
+                    <div class="mt-4">
+                        <h5 class="mb-3">Relaciones</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Inventario</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if objeto.inventario %}
+                                        <table class="table table-sm">
+                                            <tr><th>Stock disponible:</th><td>{{ objeto.inventario.cantidad_disponible }}</td></tr>
+                                            <tr><th>Stock reservado:</th><td>{{ objeto.inventario.cantidad_reservada }}</td></tr>
+                                            <tr><th>Precio:</th><td>{{ objeto.inventario.precio }}€</td></tr>
+                                            <tr><th>Vendidos total:</th><td>{{ objeto.inventario.vendidos_total }}</td></tr>
+                                            <tr><th>Disponible:</th>
+                                                <td>
+                                                    {% if objeto.inventario.disponible %}
+                                                        <span class="badge bg-success">Sí</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">No</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        {% else %}
+                                        <p class="text-muted mb-0">Sin inventario registrado</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Reseñas</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-2">Total: {{ objeto.resenas.count }}</p>
+                                        {% if objeto.inventario %}
+                                            <p class="mb-0">Valoración promedio: {{ objeto.inventario.valoracion_promedio|floatformat:1 }}/5</p>
+                                        {% else %}
+                                            <p class="mb-0 text-muted">Sin valoraciones</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fechas -->
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-plus me-1"></i>
+                                Creado: {{ objeto.fecha_creacion|date:"d/m/Y H:i" }}
+                            </small>
+                        </div>
+                        {% if objeto.fecha_actualizacion %}
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-check me-1"></i>
+                                Última actualización: {{ objeto.fecha_actualizacion|date:"d/m/Y H:i" }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

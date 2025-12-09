@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Pago en Efectivo - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Pasos del proceso -->
+            <div class="steps mb-5">
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Carrito</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Información</div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Pago</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirmación</div>
+                </div>
+            </div>
+            
+            <div class="card border-success shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        Pago en Efectivo
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Resumen del pedido -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <i class="fas fa-info-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="alert-heading">Importante</h5>
+                                <p class="mb-0">
+                                    Con esta opción, pagarás en efectivo cuando recibas tu pedido. 
+                                    El pedido se procesará pero no se enviará hasta confirmar el pago.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Instrucciones -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">¿Cómo funciona el pago en efectivo?</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-box fa-3x text-primary mb-3"></i>
+                                        <h6>1. Confirmas tu pedido</h6>
+                                        <p class="small mb-0">Tu pedido se reserva pero no se envía</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-truck fa-3x text-warning mb-3"></i>
+                                        <h6>2. Te contactamos</h6>
+                                        <p class="small mb-0">Coordinamos la entrega y pago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Condiciones -->
+                    <div class="card border-warning mb-4">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Condiciones del pago en efectivo
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>El pago se realiza al recibir el pedido</li>
+                                <li>El repartidor llevará cambio exacto</li>
+                                <li>Debes tener el importe exacto listo</li>
+                                <li>Se emitirá factura en el momento de la entrega</li>
+                                <li>Disponible solo para envíos en España peninsular</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Importe a pagar -->
+                    <div class="card border-primary mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Importe a pagar</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td>Subtotal:</td>
+                                            <td class="text-end">{{ carrito.subtotal }}€</td>
+                                        </tr>
+                                        {% if carrito.descuento > 0 %}
+                                        <tr class="text-success">
+                                            <td>Descuento:</td>
+                                            <td class="text-end">-{{ carrito.descuento }}€</td>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <td>Envío:</td>
+                                            <td class="text-end">
+                                                {% if carrito.envio == 0 %}
+                                                <span class="text-success">GRATIS</span>
+                                                {% else %}
+                                                {{ carrito.envio }}€
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Impuestos (21%):</td>
+                                            <td class="text-end">{{ carrito.impuestos }}€</td>
+                                        </tr>
+                                        <tr class="table-active fw-bold">
+                                            <td>TOTAL A PAGAR:</td>
+                                            <td class="text-end h4 text-primary">{{ carrito.total }}€</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario de confirmación -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirm_conditions" required>
+                            <label class="form-check-label" for="confirm_conditions">
+                                Acepto pagar el importe de <strong>{{ carrito.total }}€</strong> en efectivo 
+                                al recibir mi pedido. Entiendo que el pedido no se enviará hasta confirmar el pago.
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirm_address" required>
+                            <label class="form-check-label" for="confirm_address">
+                                Confirmo que la dirección de envío es correcta y estaré disponible para recibir el pedido.
+                            </label>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="{% url 'checkout' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Volver
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Confirmar Pedido con Pago en Efectivo
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Información adicional -->
+                    <div class="mt-4 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Tu pedido está 100% protegido. Recibirás confirmación por email.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ rápida -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Preguntas frecuentes sobre pago en efectivo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    ¿Cuánto tiempo tarda en llegar mi pedido?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Una vez confirmado el pedido, te contactaremos en 24-48 horas para coordinar la entrega. 
+                                    El tiempo de entrega dependerá de tu ubicación.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    ¿Puedo cambiar el método de pago después?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Sí, puedes contactarnos para cambiar a otro método de pago antes de que se procese el envío.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: 1;
+}
+
+.step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+}
+
+.step.active .step-circle {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.2);
+}
+
+.step.completed .step-circle {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.step.active .step-label {
+    color: #28a745;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+{% endblock %}

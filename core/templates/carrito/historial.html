@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Pedidos - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-history text-primary me-2"></i>Mis Pedidos
+            </h1>
+            <p class="text-muted mb-0">Historial de todos tus pedidos realizados</p>
+        </div>
+        <div>
+            <a href="{% url 'lista_cartas' %}" class="btn btn-pokemon">
+                <i class="fas fa-plus me-2"></i>Nueva Compra
+            </a>
+        </div>
+    </div>
+    
+    {% if pedidos %}
+    <div class="row">
+        <div class="col-12">
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <select class="form-select" id="filterStatus">
+                                <option value="">Todos los estados</option>
+                                <option value="PEND">Pendiente</option>
+                                <option value="PROC">En proceso</option>
+                                <option value="ENVI">Enviado</option>
+                                <option value="ENTR">Entregado</option>
+                                <option value="CANC">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="filterDate" placeholder="Fecha">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="filterSearch" placeholder="Buscar por número o producto...">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary w-100" id="applyFilters">
+                                <i class="fas fa-filter me-2"></i>Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lista de pedidos -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nº Pedido</th>
+                                    <th>Fecha</th>
+                                    <th>Productos</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in pedidos %}
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">#{{ pedido.numero_pedido|slice:":8" }}</strong>
+                                    </td>
+                                    <td>
+                                        <div>{{ pedido.fecha_pedido|date:"d/m/Y" }}</div>
+                                        <small class="text-muted">{{ pedido.fecha_pedido|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex">
+                                            {% for item in pedido.items.all|slice:":2" %}
+                                            <div class="me-2">
+                                                <img src="{{ item.carta.imagen_frontal.url }}" 
+                                                     alt="{{ item.carta.nombre }}"
+                                                     class="rounded"
+                                                     style="width: 40px; height: 40px; object-fit: contain;">
+                                            </div>
+                                            {% endfor %}
+                                            {% if pedido.items.count > 2 %}
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary">+{{ pedido.items.count|add:"-2" }}</span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">{{ pedido.cantidad_items }} producto{{ pedido.cantidad_items|pluralize }}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge estado-{{ pedido.estado|lower }}">
+                                            {{ pedido.get_estado_display }}
+                                        </span>
+                                        {% if pedido.numero_seguimiento %}
+                                        <div class="small text-muted mt-1">
+                                            <i class="fas fa-truck"></i> {{ pedido.numero_seguimiento }}
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="h5 mb-0">{{ pedido.total }}€</div>
+                                        {% if pedido.pagado %}
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle"></i> Pagado
+                                        </small>
+                                        {% else %}
+                                        <small class="text-warning">
+                                            <i class="fas fa-clock"></i> Pendiente pago
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'detalle_pedido' pedido.numero_pedido %}" 
+                                               class="btn btn-outline-primary"
+                                               title="Ver detalle">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if pedido.estado == 'PEND' %}
+                                            <a href="#" 
+                                               class="btn btn-outline-warning"
+                                               title="Cancelar pedido"
+                                               onclick="return confirm('¿Cancelar este pedido?')">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% if pedido.estado == 'ENTR' %}
+                                            <a href="#" 
+                                               class="btn btn-outline-success"
+                                               title="Dejar reseña">
+                                                <i class="fas fa-star"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estadísticas -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ pedidos.count }}</h3>
+                            <p class="mb-0">Pedidos totales</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ pedidos_entregados.count }}</h3>
+                            <p class="mb-0">Entregados</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ pedidos_pendientes.count }}</h3>
+                            <p class="mb-0">Pendientes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ total_gastado|default:"0" }}€</h3>
+                            <p class="mb-0">Total gastado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Sin pedidos -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+        </div>
+        <h3 class="mb-3">Aún no has realizado ningún pedido</h3>
+        <p class="text-muted mb-4">Cuando realices tu primera compra, aparecerá aquí</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'lista_cartas' %}" class="btn btn-pokemon">
+                <i class="fas fa-search me-2"></i>Explorar Cartas
+            </a>
+            <a href="{% url 'wishlist' %}" class="btn btn-outline-primary">
+                <i class="fas fa-heart me-2"></i>Ver mi Wishlist
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_css %}
+<style>
+.estado-pendiente { background-color: #ffc107; color: #000; }
+.estado-proc { background-color: #17a2b8; color: #fff; }
+.estado-envi { background-color: #007bff; color: #fff; }
+.estado-entr { background-color: #28a745; color: #fff; }
+.estado-canc { background-color: #dc3545; color: #fff; }
+.estado-reem { background-color: #6c757d; color: #fff; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros
+    const filterStatus = document.getElementById('filterStatus');
+    const filterDate = document.getElementById('filterDate');
+    const filterSearch = document.getElementById('filterSearch');
+    const applyFilters = document.getElementById('applyFilters');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    applyFilters.addEventListener('click', function() {
+        const status = filterStatus.value;
+        const date = filterDate.value;
+        const search = filterSearch.value.toLowerCase();
+        
+        tableRows.forEach(row => {
+            let show = true;
+            
+            // Filtrar por estado
+            if (status) {
+                const estadoBadge = row.querySelector('.badge');
+                if (estadoBadge) {
+                    const estado = estadoBadge.classList.contains(`estado-${status.toLowerCase()}`);
+                    if (!estado) show = false;
+                }
+            }
+            
+            // Filtrar por fecha
+            if (date) {
+                const fechaText = row.querySelector('td:nth-child(2) div').textContent;
+                const fecha = fechaText.split('/').reverse().join('-');
+                if (fecha !== date) show = false;
+            }
+            
+            // Filtrar por búsqueda
+            if (search) {
+                const rowText = row.textContent.toLowerCase();
+                if (!rowText.includes(search)) show = false;
+            }
+            
+            row.style.display = show ? '' : 'none';
+        });
+    });
+    
+    // Reset filters
+    const resetFilters = document.createElement('button');
+    resetFilters.className = 'btn btn-outline-secondary btn-sm mt-2';
+    resetFilters.innerHTML = '<i class="fas fa-redo me-2"></i>Limpiar filtros';
+    resetFilters.addEventListener('click', function() {
+        filterStatus.value = '';
+        filterDate.value = '';
+        filterSearch.value = '';
+        tableRows.forEach(row => row.style.display = '');
+    });
+    
+    applyFilters.parentElement.parentElement.appendChild(resetFilters);
+});
+</script>
+{% endblock %}
+{% endblock %}

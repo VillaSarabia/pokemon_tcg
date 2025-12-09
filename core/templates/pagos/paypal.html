@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}Pago con PayPal - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Pasos del proceso -->
+            <div class="steps mb-5">
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Carrito</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Información</div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Pago</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirmación</div>
+                </div>
+            </div>
+            
+            <div class="card border-info shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fab fa-paypal me-2"></i>
+                        Pago con PayPal
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Información PayPal -->
+                    <div class="text-center mb-4">
+                        <i class="fab fa-paypal fa-5x text-info mb-3"></i>
+                        <h4>Paga de forma rápida y segura con PayPal</h4>
+                        <p class="text-muted">Serás redirigido a la plataforma segura de PayPal</p>
+                    </div>
+                    
+                    <!-- Ventajas de PayPal -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 bg-light text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-bolt fa-3x text-warning mb-3"></i>
+                                    <h6>Pago Rápido</h6>
+                                    <p class="small mb-0">Sin introducir datos de tarjeta</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 bg-light text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                                    <h6>100% Seguro</h6>
+                                    <p class="small mb-0">Protegido por PayPal</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 bg-light text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                                    <h6>Datos Protegidos</h6>
+                                    <p class="small mb-0">No compartimos tu información</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumen del pedido -->
+                    <div class="card border-primary mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Resumen del pedido</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td>Número de pedido:</td>
+                                            <td class="text-end">
+                                                <strong>#{{ carrito.numero_pedido|slice:":8" }}</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Importe total:</td>
+                                            <td class="text-end h4 text-primary">{{ carrito.total }}€</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Método de pago:</td>
+                                            <td class="text-end">
+                                                <span class="badge bg-info">
+                                                    <i class="fab fa-paypal me-1"></i>PayPal
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de PayPal -->
+                    <div class="text-center mb-4">
+                        <form method="post" id="paypalForm">
+                            {% csrf_token %}
+                            <button type="submit" class="paypal-button" id="paypalButton">
+                                <i class="fab fa-paypal me-2"></i>
+                                Pagar {{ carrito.total }}€ con PayPal
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Información del proceso -->
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>¿Cómo funciona?
+                        </h5>
+                        <ol class="mb-0">
+                            <li>Haz clic en el botón "Pagar con PayPal"</li>
+                            <li>Serás redirigido a la plataforma segura de PayPal</li>
+                            <li>Inicia sesión en tu cuenta de PayPal</li>
+                            <li>Confirma el pago</li>
+                            <li>Serás redirigido de vuelta para ver la confirmación</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Alternativas -->
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-2">¿Prefieres otro método de pago?</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'pago_tarjeta' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-credit-card me-1"></i>Tarjeta
+                            </a>
+                            <a href="{% url 'pago_transferencia' %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-university me-1"></i>Transferencia
+                            </a>
+                            <a href="{% url 'pago_efectivo' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-money-bill-wave me-1"></i>Efectivo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: 1;
+}
+
+.step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+}
+
+.step.active .step-circle {
+    background-color: #17a2b8;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(23, 162, 184, 0.2);
+}
+
+.step.completed .step-circle {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.step.active .step-label {
+    color: #17a2b8;
+    font-weight: bold;
+}
+
+.paypal-button {
+    background: linear-gradient(135deg, #FFC439 0%, #FBAF17 100%);
+    color: #003087;
+    border: none;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 300px;
+    box-shadow: 0 5px 15px rgba(251, 175, 23, 0.3);
+}
+
+.paypal-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(251, 175, 23, 0.4);
+    color: #003087;
+}
+
+.paypal-button:active {
+    transform: scale(0.98);
+}
+
+.paypal-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paypalButton = document.getElementById('paypalButton');
+    const paypalForm = document.getElementById('paypalForm');
+    
+    paypalForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Animación de carga
+        paypalButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Conectando con PayPal...';
+        paypalButton.disabled = true;
+        
+        // Simular redirección a PayPal
+        setTimeout(() => {
+            // En un caso real, aquí redirigiríamos a PayPal
+            // Por ahora, simulamos el proceso
+            paypalButton.innerHTML = '<i class="fab fa-paypal me-2"></i>Redirigiendo a PayPal...';
+            
+            setTimeout(() => {
+                // Simular pago exitoso y enviar formulario
+                paypalForm.submit();
+            }, 1500);
+        }, 1000);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

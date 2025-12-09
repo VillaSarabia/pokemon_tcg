@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Pago con Tarjeta - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Pasos del proceso -->
+            <div class="steps mb-5">
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Carrito</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Información</div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Pago</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirmación</div>
+                </div>
+            </div>
+            
+            <div class="card border-primary shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Pago con Tarjeta
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Seguridad -->
+                    <div class="alert alert-success mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shield-alt fa-2x me-3"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">Pago 100% Seguro</h5>
+                                <p class="mb-0">
+                                    <i class="fas fa-lock me-1"></i> Conexión SSL encriptada
+                                    <i class="fas fa-check-circle ms-3 me-1"></i> Certificado de seguridad
+                                    <i class="fas fa-user-shield ms-3 me-1"></i> Protección antifraude
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Formulario de tarjeta -->
+                        <div class="col-lg-7">
+                            <form method="post" id="tarjetaForm">
+                                {% csrf_token %}
+                                
+                                <h5 class="mb-4">Datos de la tarjeta</h5>
+                                
+                                <!-- Número de tarjeta -->
+                                <div class="mb-4">
+                                    <label for="id_numero_tarjeta" class="form-label fw-bold">
+                                        <i class="fas fa-credit-card me-2"></i>Número de tarjeta
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" 
+                                               name="numero_tarjeta" 
+                                               id="id_numero_tarjeta"
+                                               class="form-control" 
+                                               placeholder="1234 5678 9012 3456"
+                                               maxlength="19"
+                                               required>
+                                        <span class="input-group-text">
+                                            <div class="card-icons">
+                                                <i class="fab fa-cc-visa text-primary me-2" title="Visa"></i>
+                                                <i class="fab fa-cc-mastercard text-danger" title="Mastercard"></i>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div class="form-text">
+                                        <small>Introduce los 16 dígitos de tu tarjeta</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Nombre del titular -->
+                                <div class="mb-4">
+                                    <label for="id_nombre_titular" class="form-label fw-bold">
+                                        <i class="fas fa-user me-2"></i>Nombre del titular
+                                    </label>
+                                    <input type="text" 
+                                           name="nombre_titular" 
+                                           id="id_nombre_titular"
+                                           class="form-control" 
+                                           placeholder="Como aparece en la tarjeta"
+                                           required>
+                                </div>
+                                
+                                <div class="row">
+                                    <!-- Fecha de expiración -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="id_fecha_expiracion" class="form-label fw-bold">
+                                            <i class="fas fa-calendar me-2"></i>Fecha de expiración
+                                        </label>
+                                        <input type="text" 
+                                               name="fecha_expiracion" 
+                                               id="id_fecha_expiracion"
+                                               class="form-control" 
+                                               placeholder="MM/AA"
+                                               maxlength="5"
+                                               required>
+                                    </div>
+                                    
+                                    <!-- CVV -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="id_cvv" class="form-label fw-bold">
+                                            <i class="fas fa-lock me-2"></i>Código de seguridad (CVV)
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" 
+                                                   name="cvv" 
+                                                   id="id_cvv"
+                                                   class="form-control" 
+                                                   placeholder="123"
+                                                   maxlength="4"
+                                                   required>
+                                            <span class="input-group-text" data-bs-toggle="tooltip" 
+                                                  title="Los 3-4 dígitos en el reverso de tu tarjeta">
+                                                <i class="fas fa-question-circle"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recordar tarjeta -->
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" name="recordar_tarjeta" id="recordar_tarjeta">
+                                    <label class="form-check-label" for="recordar_tarjeta">
+                                        Recordar esta tarjeta para futuras compras (opcional)
+                                    </label>
+                                </div>
+                                
+                                <!-- Términos -->
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="accept_terms" required>
+                                    <label class="form-check-label" for="accept_terms">
+                                        Acepto los <a href="#" class="text-decoration-none">términos de pago</a> 
+                                        y autorizo el cargo a mi tarjeta
+                                    </label>
+                                </div>
+                                
+                                <!-- Botón de pago -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="payButton">
+                                        <i class="fas fa-lock me-2"></i>
+                                        Pagar {{ carrito.total }}€
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Información de seguridad -->
+                            <div class="mt-4">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-info-circle me-2"></i>Tu información está segura
+                                </h6>
+                                <ul class="small text-muted mb-0">
+                                    <li>No almacenamos los datos de tu tarjeta</li>
+                                    <li>Transacción procesada mediante cifrado SSL</li>
+                                    <li>Protegido por sistema antifraude</li>
+                                    <li>Cumplimiento PCI DSS nivel 1</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Resumen del pedido -->
+                        <div class="col-lg-5">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Resumen del pedido</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Productos -->
+                                    <div class="mb-3">
+                                        <h6 class="mb-2">Productos ({{ carrito.cantidad_items }})</h6>
+                                        {% for item in carrito.items.all|slice:":3" %}
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="small">
+                                                {{ item.cantidad }}x {{ item.carta.nombre|truncatechars:20 }}
+                                            </div>
+                                            <div class="small">{{ item.subtotal }}€</div>
+                                        </div>
+                                        {% endfor %}
+                                        {% if carrito.items.count > 3 %}
+                                        <div class="text-center">
+                                            <small class="text-muted">... y {{ carrito.items.count|add:"-3" }} más</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <hr>
+                                    
+                                    <!-- Totales -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Subtotal:</span>
+                                            <strong>{{ carrito.subtotal }}€</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Envío:</span>
+                                            <strong>
+                                                {% if carrito.envio == 0 %}
+                                                <span class="text-success">GRATIS</span>
+                                                {% else %}
+                                                {{ carrito.envio }}€
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Impuestos:</span>
+                                            <strong>{{ carrito.impuestos }}€</strong>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="h5">Total:</span>
+                                            <span class="h4 text-primary">{{ carrito.total }}€</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Información de entrega -->
+                                    <div class="mt-3">
+                                        <h6 class="mb-2">
+                                            <i class="fas fa-truck me-2"></i>Entrega a:
+                                        </h6>
+                                        <address class="small mb-0">
+                                            {{ carrito.nombre_completo }}<br>
+                                            {{ carrito.direccion_envio }}<br>
+                                            {{ carrito.ciudad_envio }}, {{ carrito.codigo_postal }}
+                                        </address>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Garantías -->
+                            <div class="card mt-3 border-warning">
+                                <div class="card-body">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-shield-alt text-warning me-2"></i>Garantías
+                                    </h6>
+                                    <ul class="small mb-0">
+                                        <li>Devolución en 30 días</li>
+                                        <li>Pago 100% seguro</li>
+                                        <li>Encriptación SSL</li>
+                                        <li>Soporte 24/7</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Formatear número de tarjeta
+    const numeroTarjeta = document.getElementById('id_numero_tarjeta');
+    numeroTarjeta.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let matches = value.match(/\d{4,16}/g);
+        let match = matches && matches[0] || '';
+        let parts = [];
+        
+        for (let i = 0, len = match.length; i < len; i += 4) {
+            parts.push(match.substring(i, i + 4));
+        }
+        
+        if (parts.length) {
+            e.target.value = parts.join(' ');
+        } else {
+            e.target.value = value;
+        }
+    });
+    
+    // Formatear fecha de expiración
+    const fechaExpiracion = document.getElementById('id_fecha_expiracion');
+    fechaExpiracion.addEventListener('input', function(e) {
+        let value = e.target.value;
+        value = value.replace(/\D/g, '');
+        
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        
+        e.target.value = value;
+    });
+    
+    // Validar CVV
+    const cvvInput = document.getElementById('id_cvv');
+    cvvInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+    });
+    
+    // Validar formulario
+    const form = document.getElementById('tarjetaForm');
+    const payButton = document.getElementById('payButton');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validar número de tarjeta (algoritmo de Luhn)
+        const cardNumber = numeroTarjeta.value.replace(/\s/g, '');
+        if (!validarTarjeta(cardNumber)) {
+            alert('Número de tarjeta inválido. Por favor, verifica los dígitos.');
+            numeroTarjeta.focus();
+            return;
+        }
+        
+        // Validar fecha de expiración
+        const fecha = fechaExpiracion.value;
+        if (!validarFechaExpiracion(fecha)) {
+            alert('Fecha de expiración inválida o vencida.');
+            fechaExpiracion.focus();
+            return;
+        }
+        
+        // Validar CVV
+        const cvv = cvvInput.value;
+        if (cvv.length < 3) {
+            alert('El código de seguridad (CVV) debe tener al menos 3 dígitos.');
+            cvvInput.focus();
+            return;
+        }
+        
+        // Simular procesamiento
+        payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando pago...';
+        payButton.disabled = true;
+        
+        // Simular tiempo de procesamiento
+        setTimeout(() => {
+            form.submit();
+        }, 2000);
+    });
+    
+    function validarTarjeta(numero) {
+        // Algoritmo de Luhn
+        let sum = 0;
+        let shouldDouble = false;
+        
+        for (let i = numero.length - 1; i >= 0; i--) {
+            let digit = parseInt(numero.charAt(i));
+            
+            if (shouldDouble) {
+                if ((digit *= 2) > 9) digit -= 9;
+            }
+            
+            sum += digit;
+            shouldDouble = !shouldDouble;
+        }
+        
+        return (sum % 10) === 0;
+    }
+    
+    function validarFechaExpiracion(fecha) {
+        const parts = fecha.split('/');
+        if (parts.length !== 2) return false;
+        
+        const mes = parseInt(parts[0]);
+        const año = parseInt(parts[1]);
+        
+        if (mes < 1 || mes > 12) return false;
+        
+        const ahora = new Date();
+        const añoActual = ahora.getFullYear() % 100;
+        const mesActual = ahora.getMonth() + 1;
+        
+        if (año < añoActual) return false;
+        if (año === añoActual && mes < mesActual) return false;
+        
+        return true;
+    }
+    
+    // Tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => {
+        new bootstrap.Tooltip(tooltip);
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: 1;
+}
+
+.step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+}
+
+.step.active .step-circle {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.step.completed .step-circle {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.step.active .step-label {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.card-icons i {
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}
+{% endblock %}

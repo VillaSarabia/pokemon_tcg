@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block title %}Transferencia Bancaria - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Pasos del proceso -->
+            <div class="steps mb-5">
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Carrito</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Información</div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Pago</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirmación</div>
+                </div>
+            </div>
+            
+            <div class="card border-success shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-university me-2"></i>
+                        Transferencia Bancaria
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Información importante -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <i class="fas fa-info-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="alert-heading">Proceso de pago por transferencia</h5>
+                                <p class="mb-0">
+                                    Realiza la transferencia con los datos proporcionados y envíanos el comprobante. 
+                                    Tu pedido se procesará una vez confirmemos el pago.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Datos bancarios -->
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h5 class="mb-4">
+                                <i class="fas fa-piggy-bank me-2"></i>
+                                Datos bancarios
+                            </h5>
+                            
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">Información para la transferencia</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Titular:</th>
+                                                <td>{{ datos_bancarios.titular }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Banco:</th>
+                                                <td>Banco Pokémon TCG</td>
+                                            </tr>
+                                            <tr>
+                                                <th>IBAN:</th>
+                                                <td>
+                                                    <strong class="text-primary">{{ datos_bancarios.iban }}</strong>
+                                                    <button class="btn btn-sm btn-outline-secondary ms-2" 
+                                                            onclick="copyToClipboard('{{ datos_bancarios.iban }}')">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>BIC/SWIFT:</th>
+                                                <td>{{ datos_bancarios.bic }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Concepto:</th>
+                                                <td>
+                                                    <strong class="text-success">{{ datos_bancarios.concepto }}</strong>
+                                                    <button class="btn btn-sm btn-outline-secondary ms-2" 
+                                                            onclick="copyToClipboard('{{ datos_bancarios.concepto }}')">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Importe:</th>
+                                                <td>
+                                                    <h4 class="text-primary mb-0">{{ datos_bancarios.importe }}€</h4>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <!-- Código QR para transferencia -->
+                                    <div class="text-center mt-3">
+                                        <div class="qr-code-placeholder bg-light p-3 d-inline-block">
+                                            <i class="fas fa-qrcode fa-4x text-muted"></i>
+                                            <p class="small mb-0 mt-2">Escanea para transferencia rápida</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Instrucciones y formulario -->
+                        <div class="col-lg-6">
+                            <h5 class="mb-4">
+                                <i class="fas fa-list-ol me-2"></i>
+                                Instrucciones paso a paso
+                            </h5>
+                            
+                            <div class="timeline-instructions mb-4">
+                                <div class="timeline-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h6>Realiza la transferencia</h6>
+                                        <p class="small mb-0">
+                                            Usa los datos bancarios proporcionados. Asegúrate de incluir el concepto exacto.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h6>Guarda el comprobante</h6>
+                                        <p class="small mb-0">
+                                            Descarga o haz una captura del comprobante de transferencia.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h6>Envíanos el comprobante</h6>
+                                        <p class="small mb-0">
+                                            Sube el comprobante usando el formulario o envíalo por email.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <h6>Confirmamos el pago</h6>
+                                        <p class="small mb-0">
+                                            Procesaremos tu pedido en 24-48 horas tras confirmar el pago.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Formulario de confirmación -->
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <h6 class="mb-3">
+                                    <i class="fas fa-paperclip me-2"></i>
+                                    Subir comprobante (opcional)
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <input type="file" 
+                                           class="form-control" 
+                                           name="comprobante" 
+                                           accept=".pdf,.jpg,.jpeg,.png"
+                                           id="comprobanteFile">
+                                    <div class="form-text">
+                                        Formatos aceptados: PDF, JPG, PNG (máx. 5MB)
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="referencia" class="form-label">Número de referencia (opcional)</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           name="referencia" 
+                                           id="referencia"
+                                           placeholder="Número de referencia de la transferencia">
+                                </div>
+                                
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="confirm_transfer" required>
+                                    <label class="form-check-label" for="confirm_transfer">
+                                        Confirmo que realizaré la transferencia bancaria por 
+                                        <strong>{{ carrito.total }}€</strong> a los datos proporcionados.
+                                    </label>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Confirmar Pedido con Transferencia
+                                    </button>
+                                    <a href="{% url 'checkout' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Volver y elegir otro método
+                                    </a>
+                                </div>
+                            </form>
+                            
+                            <!-- Información adicional -->
+                            <div class="mt-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    También puedes enviar el comprobante por email
+                                </h6>
+                                <p class="small mb-0">
+                                    Envía el comprobante a 
+                                    <a href="mailto:transferencias@pokemontcg.com" class="text-decoration-none">
+                                        transferencias@pokemontcg.com
+                                    </a>
+                                    indicando el número de pedido <strong>{{ carrito.numero_pedido|slice:":8" }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información importante -->
+                    <div class="card border-warning mt-4">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Información importante
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>Las transferencias pueden tardar 24-48 horas en procesarse</li>
+                                <li>Tu pedido se enviará una vez confirmado el pago</li>
+                                <li>Mantén el comprobante de transferencia</li>
+                                <li>Para transferencias internacionales, consulta comisiones con tu banco</li>
+                                <li>Disponible solo para transferencias en EUR (Euros)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: 1;
+}
+
+.step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+}
+
+.step.active .step-circle {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.2);
+}
+
+.step.completed .step-circle {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.step.active .step-label {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.timeline-instructions {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-step {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-step:last-child {
+    margin-bottom: 0;
+}
+
+.step-number {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #28a745;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.step-content h6 {
+    margin-bottom: 5px;
+    color: #28a745;
+}
+
+.qr-code-placeholder {
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Mostrar notificación de copiado
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alert.style.cssText = 'bottom: 20px; right: 20px; z-index: 9999;';
+        alert.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            Texto copiado al portapapeles
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    });
+}
+
+// Validar tamaño de archivo
+document.getElementById('comprobanteFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (file && file.size > maxSize) {
+        alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+        e.target.value = '';
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,52 @@
+<header class="bg-primary text-white py-2">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Logo -->
+            <div class="col-md-4 col-lg-3">
+                <a href="{% url 'home' %}" class="text-decoration-none text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="logo-container me-3">
+                            <i class="fas fa-dragon fa-2x text-warning animate-float"></i>
+                        </div>
+                        <div>
+                            <h1 class="h4 mb-0 fw-bold">Pokemon TCG</h1>
+                            <small class="text-light">Tienda Oficial de Cartas</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Buscador -->
+            <div class="col-md-5 col-lg-6 mt-2 mt-md-0">
+                <form action="{% url 'buscar_cartas' %}" method="get" class="search-form">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control" 
+                               name="q" 
+                               placeholder="Buscar cartas Pokémon..."
+                               aria-label="Buscar cartas"
+                               value="{{ request.GET.q|default:'' }}"
+                               id="searchInput">
+                        <button class="btn btn-warning" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Sugerencias en tiempo real -->
+                    <div id="searchSuggestions" class="position-absolute w-100 d-none" 
+                         style="z-index: 1000; background: white; border: 1px solid #ddd; max-height: 300px; overflow-y: auto;">
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Información de contacto -->
+            <div class="col-md-3 col-lg-3 text-end d-none d-md-block">
+                <div class="d-flex flex-column">
+                    <small><i class="fas fa-phone me-1"></i> +34 912 345 678</small>
+                    <small><i class="fas fa-clock me-1"></i> 9:00 - 20:00</small>
+                    <small><i class="fas fa-shipping-fast me-1"></i> Envío 24h</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

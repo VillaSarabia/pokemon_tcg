@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Wishlist - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-heart text-danger me-2"></i>Mi Wishlist
+            </h1>
+            <p class="text-muted mb-0">Cartas que te gustaría comprar en el futuro</p>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-6">{{ wishlist.count }} cartas</span>
+        </div>
+    </div>
+    
+    {% if not wishlist %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-heart fa-4x text-muted"></i>
+        </div>
+        <h3 class="mb-3">Tu wishlist está vacía</h3>
+        <p class="text-muted mb-4">Añade cartas que te interesen para verlas aquí</p>
+        <a href="{% url 'lista_cartas' %}" class="btn btn-pokemon">
+            <i class="fas fa-search me-2"></i>Explorar Cartas
+        </a>
+    </div>
+    {% else %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for item in wishlist %}
+        {% with carta=item.carta %}
+        <div class="col">
+            <div class="card card-carta h-100">
+                <!-- Badge de Wishlist -->
+                <div class="position-absolute top-0 start-0 m-2">
+                    <span class="badge bg-danger">WISHLIST</span>
+                </div>
+                
+                <!-- Botón eliminar -->
+                <button class="btn remove-wishlist position-absolute top-0 end-0 m-2" 
+                        data-carta-id="{{ carta.id }}"
+                        style="background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; z-index: 2;">
+                    <i class="fas fa-times text-danger"></i>
+                </button>
+                
+                <!-- Imagen -->
+                <img src="{{ carta.imagen_frontal.url }}" 
+                     class="card-img-top"
+                     alt="{{ carta.nombre }}"
+                     style="height: 200px; object-fit: contain;">
+                
+                <!-- Cuerpo -->
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge badge-tipo tipo-{{ carta.tipo|lower }}">
+                            {{ carta.tipo }}
+                        </span>
+                        <small class="text-muted">
+                            <i class="fas fa-gem me-1"></i>
+                            {{ carta.get_rareza_display }}
+                        </small>
+                    </div>
+                    
+                    <h5 class="card-title">
+                        <a href="{% url 'detalle_carta' carta.id %}" class="text-decoration-none text-dark">
+                            {{ carta.nombre }}
+                        </a>
+                    </h5>
+                    
+                    <p class="card-text small text-muted mb-3">
+                        <i class="fas fa-layer-group me-1"></i>
+                        {{ carta.expansion.nombre }}
+                    </p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-primary mb-0">
+                            {{ carta.inventario.precio_actual }}€
+                        </h4>
+                        <small class="text-{% if carta.inventario.cantidad_disponible > 0 %}success{% else %}danger{% endif %}">
+                            {% if carta.inventario.cantidad_disponible > 0 %}
+                            {{ carta.inventario.cantidad_disponible }} disponibles
+                            {% else %}
+                            Agotado
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'detalle_carta' carta.id %}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-2"></i>Ver Detalles
+                        </a>
+                        
+                        {% if carta.inventario.cantidad_disponible > 0 %}
+                        <form method="post" action="{% url 'agregar_al_carrito' carta.id %}" class="d-flex gap-1">
+                            {% csrf_token %}
+                            <input type="number" 
+                                   name="cantidad" 
+                                   class="form-control form-control-sm" 
+                                   value="1" 
+                                   min="1" 
+                                   max="{{ carta.inventario.cantidad_disponible }}"
+                                   style="width: 60px;">
+                            <button type="submit" class="btn btn-pokemon btn-sm flex-grow-1">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ item.fecha_agregado|date:"d/m/Y" }}
+                        </span>
+                        <span>
+                            <i class="fas fa-fire me-1"></i>
+                            {{ carta.inventario.popularidad }} pts
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    
+    <!-- Acciones globales -->
+    <div class="mt-5 p-4 bg-light rounded">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-2">Valor total estimado de tu wishlist</h5>
+                <p class="mb-0 text-muted">
+                    {% with total=wishlist|length %}
+                    {{ total }} carta{{ total|pluralize }} • 
+                    <strong class="text-primary fs-4">
+                        {{ wishlist_total|default:"0.00" }}€
+                    </strong>
+                    {% endwith %}
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-outline-danger" id="clear-wishlist">
+                    <i class="fas fa-trash me-2"></i>Vaciar Wishlist
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Eliminar de wishlist
+    const removeButtons = document.querySelectorAll('.remove-wishlist');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const cartaId = this.dataset.cartaId;
+            const card = this.closest('.col');
+            
+            fetch(`/wishlist/eliminar/${cartaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Animación para eliminar
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        // Actualizar contador
+                        const badge = document.querySelector('.badge.bg-primary.fs-6');
+                        if (badge) {
+                            const currentCount = parseInt(badge.textContent);
+                            badge.textContent = `${currentCount - 1} cartas`;
+                        }
+                        
+                        // Mostrar notificación
+                        showNotification('success', data.message);
+                    }, 300);
+                } else {
+                    showNotification('error', data.message);
+                }
+            });
+        });
+    });
+    
+    // Vaciar wishlist
+    const clearBtn = document.getElementById('clear-wishlist');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que quieres vaciar tu wishlist?')) {
+                // En un caso real, haríamos una petición para eliminar todas
+                const cards = document.querySelectorAll('.col');
+                cards.forEach(card => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                });
+                
+                setTimeout(() => {
+                    cards.forEach(card => card.remove());
+                    // Mostrar mensaje de wishlist vacía
+                    const container = document.querySelector('.container.py-5');
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-heart fa-4x text-muted"></i>
+                            </div>
+                            <h3 class="mb-3">Tu wishlist está vacía</h3>
+                            <p class="text-muted mb-4">Añade cartas que te interesen para verlas aquí</p>
+                            <a href="{% url 'lista_cartas' %}" class="btn btn-pokemon">
+                                <i class="fas fa-search me-2"></i>Explorar Cartas
+                            </a>
+                        </div>
+                    `;
+                    
+                    showNotification('success', 'Wishlist vaciada correctamente');
+                }, 300);
+            }
+        });
+    }
+    
+    function showNotification(type, message) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

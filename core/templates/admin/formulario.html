@@ -1,0 +1,340 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{{ model_name_display }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'lista_admin' model_name=model_name %}">{{ model_name_display }}</a></li>
+                    <li class="breadcrumb-item active">{{ action|title }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'lista_admin' model_name=model_name %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Cancelar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Formulario -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{% if action == 'crear' %}plus{% else %}edit{% endif %} me-2"></i>
+                        {{ action|title }} {{ model_name_display }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- DEBUG: Verificar si hay form -->
+                        {% if not form %}
+                        <div class="alert alert-danger">
+                            ERROR: No se recibió el formulario. Verifica que la vista esté pasando el contexto correctamente.
+                        </div>
+                        {% endif %}
+                        
+                        <!-- MOSTRAR ERRORES GENERALES DEL FORMULARIO -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p class="mb-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Usar el formulario de Django COMPLETO -->
+                        {% if form %}
+                        <div class="row">
+                            {% for field in form.visible_fields %}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {{ field.label }}
+                                    {% if field.field.required %}
+                                    <span class="text-danger">*</span>
+                                    {% endif %}
+                                </label>
+                                
+                                <!-- USAR {{ field }} para que Django maneje todo -->
+                                {{ field }}
+                                
+                                {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                
+                                {% if field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in field.errors %}
+                                    <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            
+                            <!-- Campos ocultos -->
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <!-- FORMULARIO MANUAL como respaldo -->
+                        <div class="alert alert-warning">
+                            Usando formulario manual. Esto podría no guardar correctamente.
+                        </div>
+                        
+                        {% if model_name == 'carta' %}
+                        <!-- Formulario manual para Carta -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Código <span class="text-danger">*</span></label>
+                                <input type="text" name="codigo" class="form-control" 
+                                       value="{{ objeto.codigo|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                                <input type="text" name="nombre" class="form-control" 
+                                       value="{{ objeto.nombre|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Número en Expansión <span class="text-danger">*</span></label>
+                                <input type="number" name="numero_en_expansion" class="form-control" 
+                                       value="{{ objeto.numero_en_expansion|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expansión <span class="text-danger">*</span></label>
+                                <select name="expansion" class="form-control" required>
+                                    <option value="">Seleccionar expansión</option>
+                                    {% for expansion in expansions %}
+                                    <option value="{{ expansion.id }}" 
+                                            {% if objeto.expansion.id == expansion.id %}selected{% endif %}>
+                                        {{ expansion.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tipo</label>
+                                <select name="tipo" class="form-control">
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="Normal" {% if objeto.tipo == 'Normal' %}selected{% endif %}>Normal</option>
+                                    <option value="Fuego" {% if objeto.tipo == 'Fuego' %}selected{% endif %}>Fuego</option>
+                                    <option value="Agua" {% if objeto.tipo == 'Agua' %}selected{% endif %}>Agua</option>
+                                    <option value="Planta" {% if objeto.tipo == 'Planta' %}selected{% endif %}>Planta</option>
+                                    <option value="Eléctrico" {% if objeto.tipo == 'Eléctrico' %}selected{% endif %}>Eléctrico</option>
+                                    <option value="Hielo" {% if objeto.tipo == 'Hielo' %}selected{% endif %}>Hielo</option>
+                                    <option value="Lucha" {% if objeto.tipo == 'Lucha' %}selected{% endif %}>Lucha</option>
+                                    <option value="Veneno" {% if objeto.tipo == 'Veneno' %}selected{% endif %}>Veneno</option>
+                                    <option value="Tierra" {% if objeto.tipo == 'Tierra' %}selected{% endif %}>Tierra</option>
+                                    <option value="Volador" {% if objeto.tipo == 'Volador' %}selected{% endif %}>Volador</option>
+                                    <option value="Psíquico" {% if objeto.tipo == 'Psíquico' %}selected{% endif %}>Psíquico</option>
+                                    <option value="Bicho" {% if objeto.tipo == 'Bicho' %}selected{% endif %}>Bicho</option>
+                                    <option value="Roca" {% if objeto.tipo == 'Roca' %}selected{% endif %}>Roca</option>
+                                    <option value="Fantasma" {% if objeto.tipo == 'Fantasma' %}selected{% endif %}>Fantasma</option>
+                                    <option value="Dragón" {% if objeto.tipo == 'Dragón' %}selected{% endif %}>Dragón</option>
+                                    <option value="Siniestro" {% if objeto.tipo == 'Siniestro' %}selected{% endif %}>Siniestro</option>
+                                    <option value="Acero" {% if objeto.tipo == 'Acero' %}selected{% endif %}>Acero</option>
+                                    <option value="Hada" {% if objeto.tipo == 'Hada' %}selected{% endif %}>Hada</option>
+                                    <option value="Incoloro" {% if objeto.tipo == 'Incoloro' %}selected{% endif %}>Incoloro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rareza <span class="text-danger">*</span></label>
+                                <select name="rareza" class="form-control" required>
+                                    <option value="">Seleccionar rareza</option>
+                                    <option value="COMUN" {% if objeto.rareza == 'COMUN' %}selected{% endif %}>Común</option>
+                                    <option value="INFREC" {% if objeto.rareza == 'INFREC' %}selected{% endif %}>Infrecuente</option>
+                                    <option value="RARA" {% if objeto.rareza == 'RARA' %}selected{% endif %}>Rara</option>
+                                    <option value="RARA_HOLO" {% if objeto.rareza == 'RARA_HOLO' %}selected{% endif %}>Rara Holo</option>
+                                    <option value="RARA_LUM" {% if objeto.rareza == 'RARA_LUM' %}selected{% endif %}>Rara Luminosa</option>
+                                    <option value="ULTRA" {% if objeto.rareza == 'ULTRA' %}selected{% endif %}>Rara Ultra</option>
+                                    <option value="SECRETA" {% if objeto.rareza == 'SECRETA' %}selected{% endif %}>Rara Secreta</option>
+                                    <option value="EX" {% if objeto.rareza == 'EX' %}selected{% endif %}>Rara Holo EX</option>
+                                    <option value="GX" {% if objeto.rareza == 'GX' %}selected{% endif %}>Rara GX</option>
+                                    <option value="V" {% if objeto.rareza == 'V' %}selected{% endif %}>Rara Holo V</option>
+                                    <option value="VMAX" {% if objeto.rareza == 'VMAX' %}selected{% endif %}>Rara Holo VMAX</option>
+                                    <option value="PROMO" {% if objeto.rareza == 'PROMO' %}selected{% endif %}>Promo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Descripción <span class="text-danger">*</span></label>
+                                <textarea name="descripcion" class="form-control" rows="3" required>{{ objeto.descripcion|default:'' }}</textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Imagen frontal</label>
+                                <input type="file" name="imagen_frontal" class="form-control" accept="image/*">
+                                {% if objeto.imagen_frontal %}
+                                <div class="mt-2">
+                                    <img src="{{ objeto.imagen_frontal.url }}" alt="Imagen actual" class="img-fluid" style="max-height: 100px;">
+                                    <div class="form-check mt-2">
+                                        <input type="checkbox" name="imagen_frontal-clear" id="imagen_frontal-clear" class="form-check-input">
+                                        <label for="imagen_frontal-clear" class="form-check-label">Eliminar imagen actual</label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Imagen trasera</label>
+                                <input type="file" name="imagen_trasera" class="form-control" accept="image/*">
+                                {% if objeto.imagen_trasera %}
+                                <div class="mt-2">
+                                    <img src="{{ objeto.imagen_trasera.url }}" alt="Imagen actual" class="img-fluid" style="max-height: 100px;">
+                                    <div class="form-check mt-2">
+                                        <input type="checkbox" name="imagen_trasera-clear" id="imagen_trasera-clear" class="form-check-input">
+                                        <label for="imagen_trasera-clear" class="form-check-label">Eliminar imagen actual</label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" name="es_holo" id="es_holo" class="form-check-input" 
+                                           {% if objeto.es_holo %}checked{% endif %}>
+                                    <label for="es_holo" class="form-check-label">Holográfica</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" name="primera_edicion" id="primera_edicion" class="form-check-input" 
+                                           {% if objeto.primera_edicion %}checked{% endif %}>
+                                    <label for="primera_edicion" class="form-check-label">Primera edición</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" name="coleccionable" id="coleccionable" class="form-check-input" 
+                                           {% if objeto.coleccionable %}checked{% endif %}>
+                                    <label for="coleccionable" class="form-check-label">Coleccionable</label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        
+                        <!-- Botones -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{% url 'lista_admin' model_name=model_name %}" class="btn btn-secondary">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if action == 'crear' %}Crear{% else %}Guardar cambios{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Añadir clases Bootstrap automáticamente a los campos generados por Django
+    const formElements = document.querySelectorAll('form input, form select, form textarea');
+    
+    formElements.forEach(element => {
+        if (element.type === 'checkbox' || element.type === 'radio') {
+            if (!element.classList.contains('form-check-input')) {
+                element.classList.add('form-check-input');
+            }
+        } else if (element.tagName === 'SELECT') {
+            if (!element.classList.contains('form-control')) {
+                element.classList.add('form-control');
+            }
+        } else if (element.tagName === 'TEXTAREA') {
+            if (!element.classList.contains('form-control')) {
+                element.classList.add('form-control');
+            }
+        } else if (!element.classList.contains('form-control')) {
+            element.classList.add('form-control');
+        }
+    });
+    
+    // Validación de formulario
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (field.type === 'checkbox') {
+                if (!field.checked) {
+                    isValid = false;
+                    showError(field, 'Este campo es obligatorio');
+                }
+            } else if (field.type === 'file') {
+                // Para archivos, solo validar si estamos creando
+                const isEdit = '{{ action }}' === 'editar';
+                if (!field.value && !isEdit && field.required) {
+                    isValid = false;
+                    showError(field, 'Este archivo es obligatorio');
+                }
+            } else if (!field.value.trim()) {
+                isValid = false;
+                showError(field, 'Este campo es obligatorio');
+            } else {
+                removeError(field);
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            showNotification('error', 'Por favor, completa todos los campos obligatorios');
+        }
+    });
+    
+    function showError(field, message) {
+        field.classList.add('is-invalid');
+        let errorDiv = field.parentNode.querySelector('.invalid-feedback');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            errorDiv.textContent = message;
+            field.parentNode.appendChild(errorDiv);
+        }
+    }
+    
+    function removeError(field) {
+        field.classList.remove('is-invalid');
+        field.classList.add('is-valid');
+        const errorDiv = field.parentNode.querySelector('.invalid-feedback');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    function showNotification(type, message) {
+        // Eliminar notificaciones existentes
+        const existingNotifications = document.querySelectorAll('.alert.position-fixed');
+        existingNotifications.forEach(notification => notification.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

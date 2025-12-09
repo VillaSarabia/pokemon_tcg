@@ -1,0 +1,85 @@
+<footer class="bg-dark text-white py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <!-- Información de la tienda -->
+            <div class="col-md-4 mb-4">
+                <h5 class="text-warning mb-3">
+                    <i class="fas fa-dragon me-2"></i>Pokemon TCG
+                </h5>
+                <p class="text-light small">
+                    Tienda oficial de cartas Pokémon Trading Card Game en España. 
+                    Las mejores cartas, expansiones y accesorios para coleccionistas y jugadores.
+                </p>
+                <div class="social-icons mt-3">
+                    <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
+                </div>
+            </div>
+            
+            <!-- Enlaces rápidos -->
+            <div class="col-md-2 mb-4">
+                <h6 class="text-warning mb-3">Enlaces Rápidos</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'lista_cartas' %}" class="text-light text-decoration-none">Catálogo</a></li>
+                    <li class="mb-2"><a href="#" class="text-light text-decoration-none">Nuevas Llegadas</a></li>
+                    <li class="mb-2"><a href="#" class="text-light text-decoration-none">Ofertas</a></li>
+                </ul>
+            </div>
+            
+            <!-- Ayuda -->
+            <div class="col-md-3 mb-4">
+                <h6 class="text-warning mb-3">Ayuda</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#" class="text-light text-decoration-none">Envíos y Entregas</a></li>
+                    <li class="mb-2"><a href="#" class="text-light text-decoration-none">Devoluciones</a></li>
+                    <li class="mb-2"><a href="#" class="text-light text-decoration-none">Guía de Compras</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contacto y Newsletter -->
+            <div class="col-md-3 mb-4">
+                <h6 class="text-warning mb-3">Contacto</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-map-marker-alt me-2 text-warning"></i> C/ Pokémon, 123, Madrid</li>
+                    <li class="mb-2"><i class="fas fa-phone me-2 text-warning"></i> +34 912 345 678</li>
+                    <li class="mb-2"><i class="fas fa-envelope me-2 text-warning"></i> info@pokemontcg.com</li>
+                    <li><i class="fas fa-clock me-2 text-warning"></i> L-V: 9:00-20:00</li>
+                </ul>
+                
+                <!-- Newsletter -->
+                <div class="mt-4">
+                    <h6 class="text-warning mb-2">Newsletter</h6>
+                    <p class="small text-light mb-2">Suscríbete para ofertas exclusivas</p>
+                    <form class="d-flex">
+                        <input type="email" class="form-control form-control-sm" placeholder="Tu email">
+                        <button class="btn btn-warning btn-sm ms-2" type="submit">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="bg-light my-4">
+        
+        <!-- Copyright y métodos de pago -->
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-0 small text-light">
+                    &copy; {% now "Y" %} Pokemon TCG. Todos los derechos reservados.
+                    Pokémon and Pokémon TCG are trademarks of Nintendo.
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa fa-2x me-2 text-light"></i>
+                    <i class="fab fa-cc-mastercard fa-2x me-2 text-light"></i>
+                    <i class="fab fa-cc-paypal fa-2x me-2 text-light"></i>
+                    <i class="fas fa-university fa-2x text-light"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

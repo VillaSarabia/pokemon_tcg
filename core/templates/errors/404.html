@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}404 - Página no encontrada{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Icono de error -->
+                    <div class="mb-4">
+                        <i class="fas fa-search fa-5x text-primary mb-4"></i>
+                        <div class="pokeball-loader mx-auto"></div>
+                    </div>
+                    
+                    <!-- Mensaje principal -->
+                    <h1 class="display-1 fw-bold text-primary">404</h1>
+                    <h2 class="h3 mb-4">¡Pokémon no encontrado!</h2>
+                    
+                    <p class="lead text-muted mb-4">
+                        La página que buscas parece haberse escondido como un Pokémon salvaje. 
+                        Puede que haya sido movida, eliminada o que nunca haya existido.
+                    </p>
+                    
+                    <!-- Información adicional -->
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>¿Buscas una carta específica?</strong> 
+                        Prueba a buscar en nuestro catálogo o usa los filtros para encontrarla.
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                        <a href="{% url 'home' %}" class="btn btn-pokemon btn-lg">
+                            <i class="fas fa-home me-2"></i>Volver al Inicio
+                        </a>
+                        <a href="{% url 'lista_cartas' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Explorar Cartas
+                        </a>
+                        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Volver Atrás
+                        </button>
+                    </div>
+                    
+                    <!-- Búsqueda rápida -->
+                    <div class="mt-5">
+                        <h5 class="mb-3">¿Buscas algo específico?</h5>
+                        <form action="{% url 'buscar_cartas' %}" method="get" class="row g-2 justify-content-center">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           name="q" 
+                                           placeholder="Buscar cartas por nombre..."
+                                           required>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Estadísticas del sitio -->
+                    <div class="row mt-5 text-start">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <h3 class="text-primary mb-0">
+                                        {% if total_cartas %}
+                                        {{ total_cartas }}
+                                        {% else %}
+                                        500+
+                                        {% endif %}
+                                    </h3>
+                                    <p class="mb-0 small">Cartas Disponibles</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h3 class="text-success mb-0">50+</h3>
+                                    <p class="mb-0 small">Expansiones</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h3 class="text-warning mb-0">100%</h3>
+                                    <p class="mb-0 small">Garantía de Calidad</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.pokeball-loader {
+    width: 100px;
+    height: 100px;
+    border: 8px solid var(--pokemon-dark);
+    border-radius: 50%;
+    position: relative;
+    animation: spin 2s linear infinite;
+    margin: 20px auto;
+}
+
+.pokeball-loader:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    background: var(--pokemon-red);
+    border-radius: 100px 100px 0 0;
+}
+
+.pokeball-loader:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25px;
+    height: 25px;
+    background: var(--pokemon-dark);
+    border-radius: 50%;
+    border: 6px solid white;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-danger text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirmar Eliminación
+                    </h3>
+                </div>
+                <div class="card-body p-4 p-md-5 text-center">
+                    <!-- Icono de advertencia -->
+                    <div class="mb-4">
+                        <i class="fas fa-trash-alt fa-4x text-danger"></i>
+                    </div>
+                    
+                    <!-- Mensaje de confirmación -->
+                    <h4 class="mb-3">¿Estás seguro?</h4>
+                    <p class="text-muted mb-4">
+                        Estás a punto de eliminar el siguiente {{ model_name_display|lower }}:
+                    </p>
+                    
+                    <!-- Información del objeto -->
+                    <div class="card border-danger mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-2">
+                                {% if objeto.nombre %}
+                                {{ objeto.nombre }}
+                                {% elif objeto.username %}
+                                {{ objeto.username }}
+                                {% elif objeto.codigo %}
+                                {{ objeto.codigo }}
+                                {% else %}
+                                {{ objeto }}
+                                {% endif %}
+                            </h5>
+                            
+                            {% if objeto.descripcion %}
+                            <p class="card-text small text-muted mb-0">
+                                {{ objeto.descripcion|truncatechars:100 }}
+                            </p>
+                            {% endif %}
+                            
+                            {% if objeto.fecha_creacion %}
+                            <p class="card-text small text-muted mt-2 mb-0">
+                                <i class="fas fa-calendar me-1"></i>
+                                Creado: {{ objeto.fecha_creacion|date:"d/m/Y" }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Advertencia -->
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+                        {% if model_name == 'carta' %}
+                        Se eliminarán también los registros relacionados en inventario y reseñas.
+                        {% elif model_name == 'usuario' %}
+                        Se eliminarán todos los pedidos, reseñas y colecciones del usuario.
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Formulario de confirmación -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash me-2"></i>Sí, eliminar
+                            </button>
+                            <a href="{% url 'detalle_admin' model_name=model_name obj_id=objeto.id %}" 
+                               class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <!-- Información adicional -->
+                    <div class="mt-4 small text-muted">
+                        <p class="mb-1">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Esta acción será registrada en el historial del sistema.
+                        </p>
+                        {% if model_name == 'inventario' %}
+                        <p class="mb-0">
+                            <i class="fas fa-box me-1"></i>
+                            La carta seguirá disponible en el catálogo, pero sin información de stock.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirmación adicional al enviar
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Eliminando...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

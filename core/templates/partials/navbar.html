@@ -1,0 +1,155 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <!-- Logo/Brand -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <i class="fas fa-dragon me-2"></i>
+            <span class="fw-bold">Pokémon TCG</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <!-- Menú principal izquierda -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">
+                        <i class="fas fa-home me-1"></i> Inicio
+                    </a>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-layer-group me-1"></i> Catálogo
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'lista_cartas' %}">Todas las Cartas</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% for categoria in categorias_menu %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'lista_cartas' %}?categoria={{ categoria.id }}">
+                                <i class="fas fa-tag me-2"></i>{{ categoria.nombre }}
+                            </a>
+                        </li>
+                        {% empty %}
+                        <li><a class="dropdown-item text-muted" href="#">Sin categorías</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                
+                <!-- Mostrar estas opciones solo para USUARIOS NORMALES -->
+                {% if user.is_authenticated and not user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'mis_pedidos' %}">
+                        <i class="fas fa-history me-1"></i> Mis Pedidos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'wishlist' %}">
+                        <i class="fas fa-heart me-1"></i> Wishlist
+                    </a>
+                </li>
+                {% endif %}
+                
+                <!-- Mostrar panel de admin solo para ADMINISTRADORES -->
+                {% if user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link text-warning fw-bold" href="{% url 'admin_dashboard' %}">
+                        <i class="fas fa-cog me-1"></i> Panel Admin
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            
+            <!-- Menú derecha -->
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                <!-- Dropdown usuario -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <span class="me-1">{{ user.username }}</span>
+                        {% if user.is_staff %}
+                        <span class="badge bg-danger ms-1" style="font-size: 0.6rem;">ADMIN</span>
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if not user.is_staff %}
+                        <!-- Opciones para usuarios normales -->
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'wishlist' %}"><i class="fas fa-heart me-2"></i>Mi Wishlist</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% endif %}
+                        
+                        <!-- Opciones para todos los usuarios autenticados -->
+                        {% if user.is_staff %}
+                        <li><a class="dropdown-item text-warning" href="{% url 'admin_dashboard' %}"><i class="fas fa-cog me-2"></i>Panel Admin</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% endif %}
+                        
+                        <!-- Logout para todos -->
+                        <li>
+                            <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <!-- Carrito (solo para usuarios NO administradores) -->
+                {% if not user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{% url 'ver_carrito' %}">
+                        <i class="fas fa-shopping-cart me-1"></i> Carrito
+                        {% if cantidad_carrito > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ cantidad_carrito }}
+                            <span class="visually-hidden">ítems en el carrito</span>
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% else %}
+                <!-- Menú para usuarios NO autenticados -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">
+                        <i class="fas fa-user-plus me-1"></i> Registrarse
+                    </a>
+                </li>
+                
+                <!-- Carrito para usuarios NO autenticados -->
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{% url 'ver_carrito' %}">
+                        <i class="fas fa-shopping-cart me-1"></i> Carrito
+                        {% if cantidad_carrito > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ cantidad_carrito }}
+                            <span class="visually-hidden">ítems en el carrito</span>
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            
+            <!-- Barra de búsqueda (opcional) -->
+            <form class="d-flex ms-3" method="get" action="{% url 'buscar_cartas' %}">
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-sm" name="q" 
+                           placeholder="Buscar cartas..." aria-label="Buscar">
+                    <button class="btn btn-outline-light btn-sm" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</nav>

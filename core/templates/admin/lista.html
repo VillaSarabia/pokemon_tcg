@@ -1,0 +1,135 @@
+{% extends 'admin/base_admin.html' %}
+{% load admin_tags %}  <!-- Añade esta línea -->
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ model_name_display }}</h1>
+        <a href="{% url 'crear_admin' model_name=model_name %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Crear Nuevo
+        </a>
+    </div>
+    
+    <!-- Búsqueda -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="q" value="{{ query }}" 
+                           placeholder="Buscar...">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'lista_admin' model_name=model_name %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Tabla -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            {% for campo in campos %}
+                            <th>{{ campo|title }}</th>
+                            {% endfor %}
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for objeto in page_obj %}
+                        <tr>
+                            {% for campo in campos %}
+                            <td>
+                                {% with value=objeto|get_attribute:campo %}
+                                    {% if value|length > 50 %}
+                                        {{ value|slice:":50" }}...
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            {% endfor %}
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'detalle_admin' model_name=model_name obj_id=objeto.id %}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_admin' model_name=model_name obj_id=objeto.id %}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'eliminar_admin' model_name=model_name obj_id=objeto.id %}" 
+                                       class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ campos|length|add:1 }}" class="text-center">
+                                No se encontraron resultados
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&q={{ query }}">Primera</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}">
+                            Siguiente
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}">
+                            Última
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

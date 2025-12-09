@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - Pokemon TCG{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <style>
+        /* ============================================
+   VARIABLES Y CONFIGURACIÓN GENERAL
+   ============================================ */
+:root {
+    /* Colores del tema Admin */
+    --admin-dark: #1a1f36;
+    --admin-darker: #121629;
+    --admin-primary: #4a6cf7;
+    --admin-secondary: #6c757d;
+    --admin-success: #14b8a6;
+    --admin-danger: #ef4444;
+    --admin-warning: #f59e0b;
+    --admin-info: #0ea5e9;
+    --admin-light: #f8fafc;
+    --admin-border: #e2e8f0;
+    
+    /* Gradientes */
+    --gradient-admin: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    
+    /* Sombras */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+    
+    /* Bordes */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    
+    /* Transiciones */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ============================================
+   RESET Y BASE
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.admin-body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f7fb;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   LAYOUT PRINCIPAL
+   ============================================ */
+.admin-body {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.admin-sidebar {
+    width: 250px;
+    background: var(--admin-darker);
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    transition: transform var(--transition-normal);
+}
+
+.sidebar-header {
+    padding: 25px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-header small {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+    height: calc(100vh - 180px);
+    overflow-y: auto;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-menu .nav {
+    padding: 0 15px;
+}
+
+.sidebar-menu .nav-item {
+    margin-bottom: 5px;
+}
+
+.sidebar-menu .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 12px 15px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.sidebar-menu .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateX(5px);
+}
+
+.sidebar-menu .nav-link.active {
+    background: var(--gradient-admin);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-menu .nav-link i {
+    width: 20px;
+    margin-right: 12px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-footer .btn {
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.sidebar-footer .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-footer .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.sidebar-footer .btn-outline-danger {
+    border-color: rgba(239, 68, 68, 0.5);
+    color: rgba(239, 68, 68, 0.8);
+}
+
+.sidebar-footer .btn-outline-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL
+   ============================================ */
+.admin-main {
+    flex: 1;
+    margin-left: 250px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left var(--transition-normal);
+}
+
+/* ============================================
+   TOPBAR
+   ============================================ */
+.admin-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--admin-border);
+    padding: 15px 30px;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.admin-topbar .container-fluid {
+    padding: 0;
+}
+
+#sidebarToggle {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.badge.bg-danger {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    animation: pulse 2s infinite;
+}
+
+.dropdown-menu {
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-md);
+    min-width: 200px;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    font-weight: 500;
+    color: var(--admin-dark);
+}
+
+.dropdown-item:hover {
+    background-color: #f8fafc;
+    color: var(--admin-primary);
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* ============================================
+   CONTENIDO
+   ============================================ */
+.admin-content {
+    flex: 1;
+    padding: 30px;
+    background: #f5f7fb;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.admin-footer {
+    background: #fff;
+    border-top: 1px solid var(--admin-border);
+    padding: 20px 30px;
+    font-size: 0.85rem;
+    color: var(--admin-secondary);
+}
+
+.admin-footer small {
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   COMPONENTES GENERALES
+   ============================================ */
+
+/* Breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.breadcrumb-item a {
+    color: var(--admin-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-item a:hover {
+    color: #3a56d6;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--admin-secondary);
+}
+
+/* Cards */
+.card {
+    border: 1px solid var(--admin-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-normal);
+    margin-bottom: 30px;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid var(--admin-border);
+    padding: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.card-header.bg-primary {
+    background: var(--gradient-admin) !important;
+    color: #fff;
+    border: none;
+}
+
+.card-header.bg-danger {
+    background: var(--gradient-danger) !important;
+    color: #fff;
+    border: none;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* Botones */
+.btn {
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--gradient-admin);
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-warning {
+    background: var(--gradient-warning);
+    border: none;
+    color: #fff;
+}
+
+.btn-danger {
+    background: var(--gradient-danger);
+    border: none;
+}
+
+.btn-outline-secondary {
+    border: 2px solid var(--admin-border);
+    color: var(--admin-secondary);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--admin-border);
+    color: var(--admin-dark);
+}
+
+.btn-group .btn {
+    border-radius: var(--radius-md);
+}
+
+/* Tablas */
+.table-responsive {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    background: #f8fafc;
+    border-bottom: 2px solid var(--admin-border);
+    font-weight: 600;
+    color: var(--admin-dark);
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--admin-border);
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(74, 108, 247, 0.05);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Formularios */
+.form-control {
+    border: 2px solid var(--admin-border);
+    border-radius: var(--radius-md);
+    padding: 10px 15px;
+    transition: all var(--transition-fast);
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--admin-dark);
+}
+
+.form-check-input:checked {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: var(--admin-secondary);
+}
+
+/* Alertas */
+.alert {
+    border-radius: var(--radius-md);
+    border: none;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+}
+
+/* Paginación */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-item:first-child .page-link,
+.page-item:last-child .page-link {
+    border-radius: var(--radius-md);
+}
+
+.page-link {
+    color: var(--admin-primary);
+    border: 1px solid var(--admin-border);
+    padding: 8px 15px;
+    font-weight: 500;
+}
+
+.page-link:hover {
+    background-color: #f8fafc;
+    color: var(--admin-primary);
+}
+
+.page-item.active .page-link {
+    background: var(--gradient-admin);
+    border-color: var(--admin-primary);
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.badge.bg-success {
+    background: var(--gradient-success) !important;
+}
+
+.badge.bg-danger {
+    background: var(--gradient-danger) !important;
+}
+
+.badge.bg-secondary {
+    background: #e2e8f0 !important;
+    color: #475569;
+}
+
+/* ============================================
+   PÁGINAS ESPECÍFICAS
+   ============================================ */
+
+/* Dashboard */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 25px;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-normal);
+    border-left: 4px solid var(--admin-primary);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.stat-card .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--admin-dark);
+    margin-bottom: 5px;
+}
+
+.stat-card .stat-label {
+    color: var(--admin-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Lista de elementos */
+.card.mb-4 .card-body {
+    padding: 20px;
+}
+
+/* Formulario de creación/edición */
+.card.border-0.shadow-lg {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.card.border-0.shadow-lg .card-body {
+    padding: 40px;
+}
+
+.form-check {
+    margin-bottom: 15px;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.2em;
+}
+
+.form-check-label {
+    margin-left: 5px;
+    font-weight: 500;
+}
+
+/* Detalle de objeto */
+.table.table-bordered {
+    border: 1px solid var(--admin-border);
+}
+
+.table.table-bordered th {
+    background: #f8fafc;
+    width: 30%;
+    font-weight: 600;
+}
+
+.table.table-bordered td {
+    background: #fff;
+}
+
+.table.table-bordered .bg-light {
+    background: #f8fafc !important;
+}
+
+.card.border-danger {
+    border: 2px solid var(--admin-danger) !important;
+}
+
+.card.border-danger .card-body {
+    padding: 20px;
+}
+
+/* Imágenes en formularios */
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--admin-border);
+    padding: 5px;
+    background: #fff;
+}
+
+.mt-2 img {
+    transition: transform var(--transition-normal);
+}
+
+.mt-2 img:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-slide-up {
+    animation: slideInUp 0.5s ease forwards;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease forwards;
+}
+
+/* ============================================
+   UTILIDADES
+   ============================================ */
+.text-muted {
+    color: var(--admin-secondary) !important;
+}
+
+.bg-light {
+    background-color: #f8fafc !important;
+}
+
+.border-danger {
+    border-color: var(--admin-danger) !important;
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 992px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .admin-main {
+        margin-left: 0;
+    }
+    
+    #sidebarToggle {
+        display: flex;
+    }
+    
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-content {
+        padding: 20px;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 10px;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 5px;
+    }
+    
+    .sidebar-footer {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-topbar {
+        padding: 10px 15px;
+    }
+    
+    .admin-content {
+        padding: 15px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .sidebar-menu .nav-link {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-header {
+        padding: 20px 15px;
+    }
+    
+    .sidebar-header h3 {
+        font-size: 1.1rem;
+    }
+}
+
+/* ============================================
+   ESTILOS ESPECÍFICOS PARA TEMPLATES
+   ============================================ */
+
+/* Template: confirmar_eliminacion.html */
+.confirmation-card {
+    animation: scaleIn 0.5s ease;
+}
+
+.confirmation-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.d-grid.gap-2 .btn {
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Template: detalle.html */
+.card-header.bg-light h6 {
+    color: var(--admin-dark);
+    font-weight: 600;
+}
+
+.table.table-sm th,
+.table.table-sm td {
+    padding: 10px 15px;
+}
+
+/* Template: form.html */
+input[type="file"] {
+    padding: 15px;
+    background: #f8fafc;
+    border: 2px dashed var(--admin-border);
+    border-radius: var(--radius-md);
+    width: 100%;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    border-color: var(--admin-primary);
+    background: rgba(74, 108, 247, 0.05);
+}
+
+/* Template: lista.html */
+.card.mb-4 {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.card.mb-4 .card-body {
+    background: #f8fafc;
+}
+
+.card.mb-4 form .col-md-8 input {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.card.mb-4 form .col-md-2:first-of-type button {
+    border-radius: 0;
+}
+
+.card.mb-4 form .col-md-2:last-of-type a {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ============================================
+   ESTADOS Y HOVER
+   ============================================ */
+.btn:disabled,
+.btn.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-control.is-invalid {
+    border-color: var(--admin-danger);
+    background-image: none;
+}
+
+.form-control.is-valid {
+    border-color: var(--admin-success);
+    background-image: none;
+}
+
+.text-danger.small {
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* Hover effects */
+.btn-sm:hover {
+    transform: translateY(-1px);
+}
+
+.btn-group .btn:hover {
+    z-index: 1;
+}
+
+.nav-link:hover i {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADO
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+    </style>
+</head>
+<body class="admin-body">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <div class="sidebar-header">
+            <h3 class="mb-0">
+                <i class="fas fa-cog me-2"></i>Admin Panel
+            </h3>
+            <small class="text-muted">Pokemon TCG</small>
+        </div>
+        
+        <div class="sidebar-menu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" 
+                       href="{% url 'admin_dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'carta' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='carta' %}">
+                        <i class="fas fa-clone me-2"></i>Cartas
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'inventario' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='inventario' %}">
+                        <i class="fas fa-boxes me-2"></i>Inventario
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'pedido' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='pedido' %}">
+                        <i class="fas fa-shopping-bag me-2"></i>Pedidos
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'usuario' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='usuario' %}">
+                        <i class="fas fa-users me-2"></i>Usuarios
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'categoria' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='categoria' %}">
+                        <i class="fas fa-tags me-2"></i>Categorías
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'expansion' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='expansion' %}">
+                        <i class="fas fa-layer-group me-2"></i>Expansiones
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'lista_admin' and model_name == 'resena' %}active{% endif %}" 
+                       href="{% url 'lista_admin' model_name='resena' %}">
+                        <i class="fas fa-star me-2"></i>Reseñas
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm w-100 mb-2">
+                <i class="fas fa-store me-2"></i>Ir a la tienda
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm w-100">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="admin-main">
+        <!-- Top Bar -->
+        <nav class="admin-topbar">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <span class="ms-3 text-muted">
+                            <i class="fas fa-user me-1"></i>
+                            {{ user.username }}
+                            {% if user.is_superuser %}
+                            <span class="badge bg-danger ms-2">Super Admin</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="badge bg-primary">
+                                <i class="fas fa-bell me-1"></i>
+                                <span id="notification-count">0</span>
+                            </span>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>Opciones
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Content -->
+        <div class="admin-content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <!-- Footer -->
+        <footer class="admin-footer">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            &copy; {% now "Y" %} Pokemon TCG - Panel de Administración
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small class="text-muted">
+                            <i class="fas fa-server me-1"></i>
+                            v1.0.0 | Última actualización: {% now "d/m/Y H:i" %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ STATIC_URL }}js/admin.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

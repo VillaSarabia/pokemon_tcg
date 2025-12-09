@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Cartas Pokémon{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar de Filtros -->
+        <div class="col-lg-3 mb-4">
+            <div class="filter-sidebar sticky-top" style="top: 20px;">
+                <h4 class="mb-4 text-primary">
+                    <i class="fas fa-filter me-2"></i>Filtros
+                </h4>
+                
+                <form id="filterForm" method="get" action="{% url 'filtrar_cartas' %}">
+                    <!-- Búsqueda -->
+                    <div class="filter-group">
+                        <h6><i class="fas fa-search me-2"></i>Búsqueda</h6>
+                        <div class="input-group mb-3">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="q" 
+                                   placeholder="Nombre de carta..."
+                                   value="{{ request.GET.q|default:'' }}">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tipo Pokémon -->
+                    <div class="filter-group">
+                        <h6><i class="fas fa-fire me-2"></i>Tipo Pokémon</h6>
+                        <div class="row g-2">
+                            {% for tipo_key, tipo_nombre in tipos.items %}
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="tipo" 
+                                           id="tipo_{{ tipo_key }}"
+                                           value="{{ tipo_key }}"
+                                           {% if filtros_activos.tipo == tipo_key %}checked{% endif %}>
+                                    <label class="form-check-label" for="tipo_{{ tipo_key }}">
+                                        {{ tipo_nombre }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Rareza -->
+                    <div class="filter-group">
+                        <h6><i class="fas fa-gem me-2"></i>Rareza</h6>
+                        <select class="form-select" name="rareza">
+                            <option value="">Todas las rarezas</option>
+                            {% for rareza_key, rareza_nombre in rarezas.items %}
+                            <option value="{{ rareza_key }}"
+                                    {% if filtros_activos.rareza == rareza_key %}selected{% endif %}>
+                                {{ rareza_nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Expansión -->
+                    <div class="filter-group">
+                        <h6><i class="fas fa-layer-group me-2"></i>Expansión</h6>
+                        <select class="form-select" name="expansion">
+                            <option value="">Todas las expansiones</option>
+                            {% for expansion in expansiones %}
+                            <option value="{{ expansion.codigo }}"
+                                    {% if filtros_activos.expansion == expansion.codigo %}selected{% endif %}>
+                                {{ expansion.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Precio -->
+                    <div class="filter-group">
+                        <h6><i class="fas fa-tag me-2"></i>Precio</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" 
+                                       class="form-control" 
+                                       name="precio_min" 
+                                       placeholder="Mín."
+                                       min="0"
+                                       step="0.01"
+                                       value="{{ filtros_activos.precio_min|default:'' }}">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" 
+                                       class="form-control" 
+                                       name="precio_max" 
+                                       placeholder="Máx."
+                                       min="0"
+                                       step="0.01"
+                                       value="{{ filtros_activos.precio_max|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ordenar por -->
+                    <div class="filter-group">
+                        <h6><i class="fas fa-sort me-2"></i>Ordenar por</h6>
+                        <select class="form-select" name="orden">
+                            <option value="popularidad" 
+                                    {% if filtros_activos.orden == 'popularidad' %}selected{% endif %}>
+                                Más populares
+                            </option>
+                            <option value="precio_asc"
+                                    {% if filtros_activos.orden == 'precio_asc' %}selected{% endif %}>
+                                Precio: Menor a Mayor
+                            </option>
+                            <option value="precio_desc"
+                                    {% if filtros_activos.orden == 'precio_desc' %}selected{% endif %}>
+                                Precio: Mayor a Menor
+                            </option>
+                            <option value="nombre"
+                                    {% if filtros_activos.orden == 'nombre' %}selected{% endif %}>
+                                Nombre A-Z
+                            </option>
+                            <option value="nuevo"
+                                    {% if filtros_activos.orden == 'nuevo' %}selected{% endif %}>
+                                Más recientes
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-pokemon">
+                            <i class="fas fa-filter me-2"></i>Aplicar Filtros
+                        </button>
+                        <a href="{% url 'lista_cartas' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo me-2"></i>Limpiar Filtros
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Contenido Principal -->
+        <div class="col-lg-9">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Cartas Pokémon</h1>
+                    <p class="text-muted mb-0">{{ cartas.count }} cartas encontradas</p>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" data-view="grid">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mensaje si no hay cartas -->
+            {% if not cartas %}
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-search fa-4x text-muted"></i>
+                </div>
+                <h3 class="mb-3">No se encontraron cartas</h3>
+                <p class="text-muted mb-4">Intenta con otros filtros o busca cartas diferentes</p>
+                <a href="{% url 'lista_cartas' %}" class="btn btn-pokemon">
+                    <i class="fas fa-redo me-2"></i>Ver todas las cartas
+                </a>
+            </div>
+            {% endif %}
+            
+            <!-- Grid de Cartas -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="cartas-grid">
+                {% for carta in cartas %}
+                <div class="col">
+                    <div class="card card-carta h-100">
+                        <!-- Badge de Estado -->
+                        {% if carta.inventario.en_promocion %}
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-danger">OFERTA</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if carta.inventario.cantidad_disponible <= 5 %}
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-warning text-dark">ÚLTIMAS UNIDADES</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Imagen de la Carta -->
+                        <div class="position-relative">
+                            <img src="{{ carta.imagen_frontal.url }}" 
+                                 class="card-img-top"
+                                 alt="{{ carta.nombre }}"
+                                 loading="lazy"
+                                 style="height: 250px; object-fit: contain;">
+                            
+                            <!-- Wishlist button -->
+                            <button class="btn wishlist-btn position-absolute top-0 end-0 m-2" 
+                                    data-carta-id="{{ carta.id }}"
+                                    style="background: rgba(255,255,255,0.8); border-radius: 50%; width: 40px; height: 40px;">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Cuerpo de la Card -->
+                        <div class="card-body">
+                            <!-- Tipo y Rareza -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge badge-tipo tipo-{{ carta.tipo|lower }}">
+                                    {{ carta.tipo }}
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-gem me-1"></i>
+                                    {{ carta.get_rareza_display }}
+                                </small>
+                            </div>
+                            
+                            <!-- Nombre -->
+                            <h5 class="card-title">
+                                <a href="{% url 'detalle_carta' carta.id %}" class="text-decoration-none text-dark">
+                                    {{ carta.nombre }}
+                                </a>
+                            </h5>
+                            
+                            <!-- Expansión -->
+                            <p class="card-text small text-muted mb-2">
+                                <i class="fas fa-layer-group me-1"></i>
+                                {{ carta.expansion.nombre }}
+                            </p>
+                            
+                            <!-- HP y Etapa -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                {% if carta.hp %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-heart me-1"></i>{{ carta.hp }} HP
+                                </span>
+                                {% endif %}
+                                {% if carta.etapa %}
+                                <small class="text-muted">{{ carta.get_etapa_display }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Precio -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h4 class="text-primary mb-0">
+                                        {{ carta.inventario.precio_actual }}€
+                                    </h4>
+                                    {% if carta.inventario.en_promocion and carta.inventario.precio_promocional %}
+                                    <small class="text-muted text-decoration-line-through">
+                                        {{ carta.inventario.precio }}€
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    {{ carta.inventario.cantidad_disponible }} disponibles
+                                </small>
+                            </div>
+                            
+                            <!-- Botones -->
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'detalle_carta' carta.id %}" 
+                                   class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalles
+                                </a>
+                                
+                                {% if carta.inventario.cantidad_disponible > 0 %}
+                                <form method="post" action="{% url 'agregar_al_carrito' carta.id %}" 
+                                      class="add-to-cart-form">
+                                    {% csrf_token %}
+                                    <div class="input-group">
+                                        <input type="number" 
+                                               name="cantidad" 
+                                               id="cantidad-{{ carta.id }}"
+                                               class="form-control" 
+                                               value="1" 
+                                               min="1" 
+                                               max="{{ carta.inventario.cantidad_disponible }}">
+                                        <button type="submit" class="btn btn-pokemon">
+                                            <i class="fas fa-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-secondary disabled" disabled>
+                                    <i class="fas fa-times-circle me-2"></i>Agotado
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="card-footer bg-transparent border-top-0">
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>
+                                    <i class="fas fa-star text-warning me-1"></i>
+                                    {{ carta.inventario.valoracion_promedio|default:"N/A" }}
+                                </span>
+                                <span>
+                                    <i class="fas fa-fire text-danger me-1"></i>
+                                    {{ carta.inventario.popularidad }} pts
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Paginación -->
+            {% if cartas.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if cartas.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ cartas.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in cartas.paginator.page_range %}
+                        {% if cartas.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > cartas.number|add:'-3' and num < cartas.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if cartas.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ cartas.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ cartas.paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cambiar vista entre grid y lista
+    const gridViewBtn = document.querySelector('[data-view="grid"]');
+    const listViewBtn = document.querySelector('[data-view="list"]');
+    const cartasGrid = document.getElementById('cartas-grid');
+    
+    gridViewBtn.addEventListener('click', function() {
+        this.classList.add('active');
+        listViewBtn.classList.remove('active');
+        cartasGrid.classList.remove('row-cols-1');
+        cartasGrid.classList.add('row-cols-1', 'row-cols-sm-2', 'row-cols-md-3', 'row-cols-xl-4');
+    });
+    
+    listViewBtn.addEventListener('click', function() {
+        this.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        cartasGrid.classList.remove('row-cols-1', 'row-cols-sm-2', 'row-cols-md-3', 'row-cols-xl-4');
+        cartasGrid.classList.add('row-cols-1');
+    });
+    
+    // Wishlist
+    const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+    wishlistButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const cartaId = this.dataset.cartaId;
+            
+            fetch(`/wishlist/agregar/${cartaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('far')) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-danger');
+                    } else {
+                        icon.classList.remove('fas', 'text-danger');
+                        icon.classList.add('far');
+                    }
+                    
+                    // Mostrar notificación
+                    showNotification('success', data.message);
+                }
+            });
+        });
+    });
+    
+    // Agregar al carrito
+    const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+    addToCartForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const cartaId = this.action.split('/').filter(part => part).pop();
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('success', data.message);
+                    // Actualizar contador del carrito
+                    document.querySelectorAll('.cart-badge').forEach(badge => {
+                        badge.textContent = data.cart_count;
+                        badge.style.display = data.cart_count > 0 ? 'inline-block' : 'none';
+                    });
+                } else {
+                    showNotification('error', data.message);
+                }
+            });
+        });
+    });
+    
+    function showNotification(type, message) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

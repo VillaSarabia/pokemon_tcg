@@ -1,0 +1,353 @@
+<!-- En templates/cartas/buscar.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Buscar Cartas Pokémon{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Encabezado de búsqueda -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h1 class="h3 mb-3">
+                        <i class="fas fa-search me-2"></i>Buscar Cartas Pokémon
+                    </h1>
+                    
+                    <!-- Barra de búsqueda principal -->
+                    <form method="get" action="{% url 'buscar_cartas' %}" class="mb-3">
+                        <div class="input-group input-group-lg">
+                            <input type="text" class="form-control" name="q" 
+                                   value="{{ query }}" placeholder="Buscar por nombre, código o expansión..."
+                                   aria-label="Buscar cartas">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if query %}
+                    <p class="mb-0">
+                        <span class="badge bg-primary">{{ resultados_count }}</span>
+                        resultado{% if resultados_count != 1 %}s{% endif %} para: 
+                        <strong>"{{ query }}"</strong>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar de filtros -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filtrosForm">
+                        <input type="hidden" name="q" value="{{ query }}">
+                        
+                        <!-- Filtro por Categoría -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Categoría</label>
+                            <select name="categoria" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {% if not filtros_activos.categoria %}selected{% endif %}>
+                                    Todas las categorías
+                                </option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" 
+                                        {% if filtros_activos.categoria == categoria.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Filtro por Tipo -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tipo Pokémon</label>
+                            <select name="tipo" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {% if not filtros_activos.tipo %}selected{% endif %}>
+                                    Todos los tipos
+                                </option>
+                                {% for tipo_key, tipo_nombre in tipos %}
+                                <option value="{{ tipo_key }}" 
+                                        {% if filtros_activos.tipo == tipo_key %}selected{% endif %}>
+                                    {{ tipo_nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Filtro por Rareza -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Rareza</label>
+                            <select name="rareza" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {% if not filtros_activos.rareza %}selected{% endif %}>
+                                    Todas las rarezas
+                                </option>
+                                {% for rareza_key, rareza_nombre in rarezas %}
+                                <option value="{{ rareza_key }}" 
+                                        {% if filtros_activos.rareza == rareza_key %}selected{% endif %}>
+                                    {{ rareza_nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Filtro por Expansión -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Expansión</label>
+                            <select name="expansion" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {% if not filtros_activos.expansion %}selected{% endif %}>
+                                    Todas las expansiones
+                                </option>
+                                {% for expansion in expansiones %}
+                                <option value="{{ expansion.id }}" 
+                                        {% if filtros_activos.expansion == expansion.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ expansion.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Ordenamiento -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ordenar por</label>
+                            <select name="orden" class="form-select" onchange="this.form.submit()">
+                                <option value="nombre" {% if filtros_activos.orden == 'nombre' %}selected{% endif %}>
+                                    Nombre (A-Z)
+                                </option>
+                                <option value="precio_asc" {% if filtros_activos.orden == 'precio_asc' %}selected{% endif %}>
+                                    Precio (Menor a Mayor)
+                                </option>
+                                <option value="precio_desc" {% if filtros_activos.orden == 'precio_desc' %}selected{% endif %}>
+                                    Precio (Mayor a Menor)
+                                </option>
+                                <option value="nuevo" {% if filtros_activos.orden == 'nuevo' %}selected{% endif %}>
+                                    Más Nuevo
+                                </option>
+                                <option value="popularidad" {% if filtros_activos.orden == 'popularidad' %}selected{% endif %}>
+                                    Más Popular
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Botón Limpiar Filtros -->
+                        <div class="d-grid">
+                            <a href="{% url 'buscar_cartas' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> Limpiar Filtros
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados de búsqueda -->
+        <div class="col-lg-9">
+            {% if cartas %}
+                <!-- Contador y estado de filtros -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="badge bg-info">{{ cartas.paginator.count }}</span>
+                        carta{% if cartas.paginator.count != 1 %}s{% endif %} encontrada{% if cartas.paginator.count != 1 %}s{% endif %}
+                    </div>
+                    <div class="text-muted small">
+                        Página {{ cartas.number }} de {{ cartas.paginator.num_pages }}
+                    </div>
+                </div>
+
+                <!-- Filtros activos -->
+                {% if filtros_activos.tipo or filtros_activos.rareza or filtros_activos.expansion or filtros_activos.categoria %}
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            Filtros aplicados:
+                            {% for key, value in filtros_activos.items %}
+                                {% if value and key != 'query' and key != 'orden' %}
+                                    {% if key == 'tipo' %}
+                                        <span class="badge bg-primary ms-2">Tipo: {{ value }}</span>
+                                    {% elif key == 'rareza' %}
+                                        <span class="badge bg-success ms-2">Rareza: {{ value }}</span>
+                                    {% elif key == 'expansion' %}
+                                        {% for exp in expansiones %}
+                                            {% if exp.id|stringformat:"i" == value %}
+                                                <span class="badge bg-warning ms-2">Expansión: {{ exp.nombre }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% elif key == 'categoria' %}
+                                        {% for cat in categorias %}
+                                            {% if cat.id|stringformat:"i" == value %}
+                                                <span class="badge bg-danger ms-2">Categoría: {{ cat.nombre }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Grid de cartas -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for carta in cartas %}
+                    <div class="col">
+                        <div class="card h-100 carta-item">
+                            {% if carta.imagen_frontal %}
+                            <img src="{{ carta.imagen_frontal.url }}" class="card-img-top" 
+                                 alt="{{ carta.nombre }}" style="height: 200px; object-fit: contain;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ carta.nombre }}</h5>
+                                <p class="card-text text-muted small mb-2">
+                                    {{ carta.expansion.nombre }} • #{{ carta.numero_en_expansion }}
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <span class="badge bg-{{ carta.tipo|lower }} me-1">{{ carta.tipo }}</span>
+                                        {% if carta.tipo_secundario %}
+                                        <span class="badge bg-secondary">{{ carta.tipo_secundario }}</span>
+                                        {% endif %}
+                                        <span class="badge bg-dark">{{ carta.get_rareza_display }}</span>
+                                    </div>
+                                </div>
+                                
+                                {% if carta.inventario %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="h5">{{ carta.inventario.precio_actual }} €</strong>
+                                        {% if carta.inventario.en_promocion %}
+                                        <span class="text-danger small ms-2">
+                                            <s>{{ carta.inventario.precio }} €</s>
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="small text-muted">
+                                        {% if carta.inventario.disponible %}
+                                        <span class="text-success">✓ Disponible</span>
+                                        {% else %}
+                                        <span class="text-danger">✗ Agotado</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'detalle_carta' carta.id %}" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fas fa-eye me-1"></i> Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginación -->
+                {% if cartas.paginator.num_pages > 1 %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if cartas.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% for key, value in filtros_activos.items %}{% if value and key != 'query' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                                Primera
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% for key, value in filtros_activos.items %}{% if value and key != 'query' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ cartas.previous_page_number }}">
+                                Anterior
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in cartas.paginator.page_range %}
+                            {% if num >= cartas.number|add:"-2" and num <= cartas.number|add:"2" %}
+                                <li class="page-item {% if cartas.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% for key, value in filtros_activos.items %}{% if value and key != 'query' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if cartas.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% for key, value in filtros_activos.items %}{% if value and key != 'query' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ cartas.next_page_number }}">
+                                Siguiente
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% for key, value in filtros_activos.items %}{% if value and key != 'query' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ cartas.paginator.num_pages }}">
+                                Última
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <!-- Sin resultados -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-search fa-4x text-muted"></i>
+                    </div>
+                    <h4 class="mb-3">No se encontraron cartas</h4>
+                    <p class="text-muted mb-4">
+                        {% if query %}
+                        No hay resultados para "<strong>{{ query }}</strong>"
+                        {% else %}
+                        No hay cartas que coincidan con los filtros seleccionados
+                        {% endif %}
+                    </p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'buscar_cartas' %}" class="btn btn-primary">
+                            <i class="fas fa-redo me-1"></i> Ver Todas las Cartas
+                        </a>
+                        <a href="{% url 'lista_cartas' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-layer-group me-1"></i> Catálogo Completo
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.badge.bg-normal { background-color: #A8A878; color: white; }
+.badge.bg-fuego { background-color: #F08030; color: white; }
+.badge.bg-agua { background-color: #6890F0; color: white; }
+.badge.bg-planta { background-color: #78C850; color: white; }
+.badge.bg-eléctrico { background-color: #F8D030; color: #333; }
+.badge.bg-hielo { background-color: #98D8D8; color: #333; }
+.badge.bg-lucha { background-color: #C03028; color: white; }
+.badge.bg-veneno { background-color: #A040A0; color: white; }
+.badge.bg-tierra { background-color: #E0C068; color: #333; }
+.badge.bg-volador { background-color: #A890F0; color: white; }
+.badge.bg-psíquico { background-color: #F85888; color: white; }
+.badge.bg-bicho { background-color: #A8B820; color: white; }
+.badge.bg-roca { background-color: #B8A038; color: white; }
+.badge.bg-fantasma { background-color: #705898; color: white; }
+.badge.bg-dragón { background-color: #7038F8; color: white; }
+.badge.bg-siniestro { background-color: #705848; color: white; }
+.badge.bg-acero { background-color: #B8B8D0; color: #333; }
+.badge.bg-hada { background-color: #EE99AC; color: #333; }
+.badge.bg-incoloro { background-color: #C6C6A7; color: #333; }
+
+.carta-item {
+    transition: transform 0.2s;
+    border: 1px solid #dee2e6;
+}
+
+.carta-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

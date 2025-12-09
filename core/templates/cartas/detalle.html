@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ carta.nombre }} - Pokemon TCG{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'lista_cartas' %}">Cartas</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'lista_cartas' %}?expansion={{ carta.expansion.codigo }}">
+                {{ carta.expansion.nombre }}
+            </a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ carta.nombre }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Columna izquierda: Imagen -->
+        <div class="col-lg-5 mb-4">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <!-- Imagen principal -->
+                    <div class="text-center mb-4">
+                        <img src="{{ carta.imagen_frontal.url }}" 
+                             class="img-fluid rounded" 
+                             alt="{{ carta.nombre }}"
+                             style="max-height: 400px;">
+                    </div>
+                    
+                    <!-- Miniaturas -->
+                    {% if carta.imagen_trasera %}
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="#" class="d-block border rounded p-2 text-center active" 
+                               data-image="{{ carta.imagen_frontal.url }}">
+                                <img src="{{ carta.imagen_frontal.url }}" 
+                                     class="img-fluid" 
+                                     style="height: 100px; object-fit: contain;">
+                                <small class="d-block mt-1">Frontal</small>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="#" class="d-block border rounded p-2 text-center" 
+                               data-image="{{ carta.imagen_trasera.url }}">
+                                <img src="{{ carta.imagen_trasera.url }}" 
+                                     class="img-fluid" 
+                                     style="height: 100px; object-fit: contain;">
+                                <small class="d-block mt-1">Trasera</small>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Stock y Precio -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5 class="text-primary mb-0">{{ carta.inventario.precio_actual }}€</h5>
+                                {% if carta.inventario.en_promocion and carta.inventario.precio_promocional %}
+                                <small class="text-muted text-decoration-line-through">
+                                    {{ carta.inventario.precio }}€
+                                </small>
+                                <span class="badge bg-danger ms-2">-{{ carta.inventario.descuento_porcentaje }}%</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="mb-0">
+                                    <span class="badge {% if carta.inventario.cantidad_disponible > 5 %}bg-success{% else %}bg-warning{% endif %}">
+                                        {% if carta.inventario.cantidad_disponible > 0 %}
+                                        {{ carta.inventario.cantidad_disponible }} disponibles
+                                        {% else %}
+                                        Agotado
+                                        {% endif %}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Acciones -->
+                    <div class="mt-4">
+                        <div class="row g-2">
+                            <div class="col-8">
+                                {% if carta.inventario.cantidad_disponible > 0 %}
+                                <form method="post" action="{% url 'agregar_al_carrito' carta.id %}" 
+                                      class="d-flex gap-2">
+                                    {% csrf_token %}
+                                    <input type="number" 
+                                           name="cantidad" 
+                                           class="form-control" 
+                                           value="1" 
+                                           min="1" 
+                                           max="{{ carta.inventario.cantidad_disponible }}"
+                                           style="width: 80px;">
+                                    <button type="submit" class="btn btn-pokemon flex-grow-1">
+                                        <i class="fas fa-cart-plus me-2"></i>Añadir al Carrito
+                                    </button>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="fas fa-times-circle me-2"></i>Agotado
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-danger w-100 wishlist-btn" 
+                                        data-carta-id="{{ carta.id }}"
+                                        title="Añadir a Wishlist">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Comprar ahora -->
+                        {% if carta.inventario.cantidad_disponible > 0 %}
+                        <div class="mt-2">
+                            <a href="{% url 'checkout' %}?carta={{ carta.id }}" 
+                               class="btn btn-outline-success w-100">
+                                <i class="fas fa-bolt me-2"></i>Comprar Ahora
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información rápida -->
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between small text-muted mb-2">
+                            <span><i class="fas fa-barcode me-1"></i> {{ carta.codigo }}</span>
+                            <span><i class="fas fa-hashtag me-1"></i> #{{ carta.numero_en_expansion }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span><i class="fas fa-calendar me-1"></i> {{ carta.fecha_creacion|date:"d/m/Y" }}</span>
+                            <span><i class="fas fa-language me-1"></i> {{ carta.get_idioma_display }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna derecha: Información detallada -->
+        <div class="col-lg-7">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h1 class="h2 mb-1">{{ carta.nombre }}</h1>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge badge-tipo tipo-{{ carta.tipo|lower }} fs-6">
+                            {{ carta.tipo }}
+                        </span>
+                        {% if carta.tipo_secundario %}
+                        <span class="badge badge-tipo tipo-{{ carta.tipo_secundario|lower }} fs-6">
+                            {{ carta.tipo_secundario }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-layer-group me-1"></i>
+                        {{ carta.expansion.nombre }} • 
+                        <span class="text-warning">
+                            <i class="fas fa-gem me-1"></i>
+                            {{ carta.get_rareza_display }}
+                        </span>
+                    </p>
+                </div>
+                <div class="text-end">
+                    <div class="rating mb-2">
+                        {% with rating=carta.inventario.valoracion_promedio|default:0 %}
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= rating %}
+                            <i class="fas fa-star text-warning"></i>
+                            {% elif forloop.counter <= rating|add:0.5 %}
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                            {% else %}
+                            <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <small class="text-muted">({{ carta.resenas.count }})</small>
+                        {% endwith %}
+                    </div>
+                    <div class="text-muted small">
+                        <i class="fas fa-fire text-danger me-1"></i>
+                        Popularidad: {{ carta.inventario.popularidad }} pts
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Descripción -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Descripción</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ carta.descripcion }}</p>
+                    
+                    <!-- Detalles específicos -->
+                    <div class="row mt-3">
+                        {% if carta.hp %}
+                        <div class="col-md-3 mb-2">
+                            <strong><i class="fas fa-heart text-danger me-1"></i> HP:</strong>
+                            <span class="badge bg-danger">{{ carta.hp }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if carta.etapa %}
+                        <div class="col-md-3 mb-2">
+                            <strong><i class="fas fa-level-up-alt me-1"></i> Etapa:</strong>
+                            <span>{{ carta.get_etapa_display }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if carta.debilidad %}
+                        <div class="col-md-3 mb-2">
+                            <strong><i class="fas fa-skull me-1"></i> Debilidad:</strong>
+                            <span class="badge badge-tipo tipo-{{ carta.debilidad|lower }}">
+                                {{ carta.debilidad }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if carta.resistencia %}
+                        <div class="col-md-3 mb-2">
+                            <strong><i class="fas fa-shield-alt me-1"></i> Resistencia:</strong>
+                            <span class="badge badge-tipo tipo-{{ carta.resistencia|lower }}">
+                                {{ carta.resistencia }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ataques -->
+            {% if carta.ataque_1_nombre or carta.habilidad_nombre %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-fist-raised me-2"></i>Ataques y Habilidades</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Habilidad -->
+                    {% if carta.habilidad_nombre %}
+                    <div class="mb-4">
+                        <h6 class="text-primary">
+                            <i class="fas fa-magic me-2"></i>{{ carta.habilidad_nombre }}
+                        </h6>
+                        <p class="mb-0">{{ carta.habilidad_descripcion }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Ataque 1 -->
+                    {% if carta.ataque_1_nombre %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0">{{ carta.ataque_1_nombre }}</h6>
+                            {% if carta.ataque_1_dano %}
+                            <span class="badge bg-dark">{{ carta.ataque_1_dano }} daño</span>
+                            {% endif %}
+                        </div>
+                        {% if carta.ataque_1_costo %}
+                        <p class="small text-muted mb-1">
+                            <strong>Coste:</strong> {{ carta.ataque_1_costo }}
+                        </p>
+                        {% endif %}
+                        {% if carta.ataque_1_descripcion %}
+                        <p class="mb-0 small">{{ carta.ataque_1_descripcion }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Ataque 2 -->
+                    {% if carta.ataque_2_nombre %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0">{{ carta.ataque_2_nombre }}</h6>
+                            {% if carta.ataque_2_dano %}
+                            <span class="badge bg-dark">{{ carta.ataque_2_dano }} daño</span>
+                            {% endif %}
+                        </div>
+                        {% if carta.ataque_2_costo %}
+                        <p class="small text-muted mb-1">
+                            <strong>Coste:</strong> {{ carta.ataque_2_costo }}
+                        </p>
+                        {% endif %}
+                        {% if carta.ataque_2_descripcion %}
+                        <p class="mb-0 small">{{ carta.ataque_2_descripcion }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Detalles de la carta -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Detalles de la Carta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Condición:</th>
+                                    <td>{{ carta.get_condicion_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Edición:</th>
+                                    <td>
+                                        {% if carta.primera_edicion %}
+                                        <span class="badge bg-warning text-dark">Primera Edición</span>
+                                        {% else %}
+                                        Normal
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Holográfica:</th>
+                                    <td>
+                                        {% if carta.es_holo %}
+                                        <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                        No
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Retirada:</th>
+                                    <td>{{ carta.costo_retirada|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Coleccionable:</th>
+                                    <td>
+                                        {% if carta.coleccionable %}
+                                        <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Precio estimado:</th>
+                                    <td>
+                                        <strong class="text-primary">{{ carta.precio_estimado }}€</strong>
+                                        <small class="text-muted">(estimado)</small>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cartas relacionadas -->
+            {% if cartas_relacionadas %}
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-random me-2"></i>Cartas Relacionadas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-2 row-cols-md-3 g-3">
+                        {% for carta_rel in cartas_relacionadas %}
+                        <div class="col">
+                            <a href="{% url 'detalle_carta' carta_rel.id %}" class="text-decoration-none">
+                                <div class="card h-100 border">
+                                    <img src="{{ carta_rel.imagen_frontal.url }}" 
+                                         class="card-img-top" 
+                                         alt="{{ carta_rel.nombre }}"
+                                         style="height: 150px; object-fit: contain;">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1 text-dark">{{ carta_rel.nombre|truncatechars:20 }}</h6>
+                                        <p class="card-text small text-muted mb-1">
+                                            {{ carta_rel.get_tipo_display }}
+                                        </p>
+                                        <p class="card-text small text-primary mb-0">
+                                            {{ carta_rel.inventario.precio_actual }}€
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cambiar imagen al hacer clic en miniatura
+    const thumbnails = document.querySelectorAll('[data-image]');
+    const mainImage = document.querySelector('.img-fluid.rounded');
+    
+    thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function(e) {
+            e.preventDefault();
+            const imageUrl = this.dataset.image;
+            mainImage.src = imageUrl;
+            
+            // Actualizar clase activa
+            thumbnails.forEach(t => t.classList.remove('active', 'border-primary'));
+            this.classList.add('active', 'border-primary');
+        });
+    });
+    
+    // Wishlist
+    const wishlistBtn = document.querySelector('.wishlist-btn');
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', function() {
+            const cartaId = this.dataset.cartaId;
+            const icon = this.querySelector('i');
+            
+            fetch(`/wishlist/agregar/${cartaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (icon.classList.contains('far')) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-danger');
+                    } else {
+                        icon.classList.remove('fas', 'text-danger');
+                        icon.classList.add('far');
+                    }
+                    
+                    // Mostrar notificación
+                    showNotification(data.success ? 'success' : 'error', data.message);
+                }
+            });
+        });
+    }
+    
+    function showNotification(type, message) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
